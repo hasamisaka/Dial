@@ -780,6 +780,9 @@ class PlaybackService : MediaLibraryService() {
 
     private val localBitrateCache = ConcurrentHashMap<String, Int>()
 
+    /** YouTube bitrates read back from the disk cache; see [resolveCachedStreamBitrate]. */
+    private val cachedStreamBitrate = ConcurrentHashMap<String, Int>()
+
     /**
      * The stream resolver the player's own data source runs, kept so a Cast
      * receiver can be handed the URL it would have produced — see
@@ -1392,6 +1395,7 @@ class PlaybackService : MediaLibraryService() {
         // state lives.
         NerdStats.forgetLastSession()
         localBitrateCache.clear()
+        cachedStreamBitrate.clear()
         QualityUpgrade.forgetLastSession()
 
         setMediaNotificationProvider(
@@ -3757,6 +3761,7 @@ class PlaybackService : MediaLibraryService() {
         scheduleForeignCachePurge()
         mediaItem?.mediaId?.let { id ->
             resolveLocalBitrate(id, mediaItem)
+            resolveCachedStreamBitrate(id, mediaItem)
         }
 
         // A crossfade handoff never fires [formatListener] for the entering
@@ -6877,6 +6882,24 @@ class PlaybackService : MediaLibraryService() {
         }
     }
 
+    /**
+     * A YouTube track played from the disk cache never reaches the resolver,
+     * so no bitrate is picked for it this session. The cache keeps the figure
+     * with the bytes ([AudioCache.servedKbpsOf]); read it once, off the main
+     * thread, and show it if nothing better is known.
+     */
+    private fun resolveCachedStreamBitrate(mediaId: String, mediaItem: MediaItem?) {
+        if (isLocalPlayback(mediaId, mediaItem)) return
+        if (cachedStreamBitrate.containsKey(mediaId)) return
+        scope.launch(Dispatchers.IO) {
+            val kbps = AudioCache.servedKbpsOf(mediaId) ?: return@launch
+            cachedStreamBitrate[mediaId] = kbps
+            withContext(Dispatchers.Main) {
+                if (player?.currentMediaItem?.mediaId == mediaId) publishNerdStats()
+            }
+        }
+    }
+
     private fun publishNerdStats() {
         val player = player ?: return
         val mediaId = player.currentMediaItem?.mediaId
@@ -6904,6 +6927,8 @@ class PlaybackService : MediaLibraryService() {
                 Pair(NerdStats.declaredFormat(mediaId)?.kbps, TelemetryProvenance.AUTHORITATIVE)
             NerdStats.pickedBitrateKbps(mediaId) != null ->
                 Pair(NerdStats.pickedBitrateKbps(mediaId), TelemetryProvenance.AUTHORITATIVE)
+            mediaId != null && cachedStreamBitrate.containsKey(mediaId) ->
+                Pair(cachedStreamBitrate[mediaId], TelemetryProvenance.AUTHORITATIVE)
             dsd == null && isRawPcm && pcmDataRate != null ->
                 Pair(pcmDataRate, TelemetryProvenance.DERIVED)
             else ->
@@ -8564,6 +8589,7 @@ class PlaybackService : MediaLibraryService() {
         AudioOutputStatus.reset()
         NerdStats.forgetLastSession()
         localBitrateCache.clear()
+        cachedStreamBitrate.clear()
         super.onDestroy()
     }
 
