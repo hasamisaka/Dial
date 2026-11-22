@@ -1492,4 +1492,7 @@
     <string name="episode_filter_in_progress">Sedang diputar</string>
     <string name="episode_filter_played">Sudah diputar</string>
     <string name="episode_filter_none">Tidak ada episode di filter ini.</string>
+    <string name="spotify_dial_seeds">Saran Spotify dari</string>
+    <string name="spotify_dial_seeds_plays">Putaran di Dial</string>
+    <string name="spotify_dial_seeds_top">Top Spotify</string>
 </resources>

@@ -9,6 +9,7 @@ import com.music.bitchord.data.model.SearchResult
 import com.music.bitchord.data.model.ShelfItem
 import com.music.bitchord.data.model.Song
 import com.music.bitchord.data.settings.AppSettings
+import com.music.bitchord.data.settings.SpotifyDialSeeds
 import com.music.bitchord.data.sources.TrackMatcher
 import com.music.bitchord.data.stats.ListeningStats
 import kotlinx.coroutines.CancellationException
@@ -48,6 +49,10 @@ object SpotifyRecommendations {
     private const val DIAL_TRACKS_PER_SEED = 12
     private const val DIAL_TIMEOUT_MS = 25_000L
 
+    /** Top songs and top artists read for each span, for the dial's top seeds. */
+    private const val TOP_PER_RANGE = 10
+    private const val TOP_POOL_TTL_MS = 6L * 60 * 60 * 1000
+
     /** Whether a Spotify account is signed in. */
     fun connected(): Boolean = AppSettings.spotifySpdcToken.value.isNotBlank()
 
@@ -65,23 +70,36 @@ object SpotifyRecommendations {
     }
 
     /**
-     * The speed dial's Spotify tiles: what Spotify recommends after the songs
-     * played here lately, a few from each so no one song fills the dial. Empty
-     * when there is nothing to seed from or Spotify can't be reached.
+     * The speed dial's Spotify tiles: what Spotify recommends after a few
+     * seeds, a few from each so no one seed fills the dial. With [seeds] at
+     * [SpotifyDialSeeds.PLAYS] the seeds are the songs played here lately;
+     * at [SpotifyDialSeeds.TOP] they are the account's top songs and artists
+     * on Spotify, moved on by one deal each [round] (see [SpotifyTopSeeds]).
+     * When the top lists can't be read, the songs played here are used.
+     * Empty when there is nothing to seed from or Spotify can't be reached.
      */
-    suspend fun dialPicks(): List<ShelfItem> = try {
+    suspend fun dialPicks(seeds: SpotifyDialSeeds = SpotifyDialSeeds.PLAYS, round: Int = 0): List<ShelfItem> = try {
         withTimeoutOrNull(DIAL_TIMEOUT_MS) {
-            val seeds = ListeningStats.recentTracks(DIAL_SEEDS * 2)
-                .filter { it.title.isNotBlank() && it.artist.isNotBlank() }
-                .take(DIAL_SEEDS)
-            val stations = coroutineScope {
-                seeds.map { seed -> async { picksFor(seed.title, seed.artist, DIAL_TRACKS_PER_SEED) } }.awaitAll()
+            val top = if (seeds == SpotifyDialSeeds.TOP) {
+                SpotifyTopSeeds.deal(topSeedPool(), DIAL_SEEDS, round)
+            } else {
+                emptyList()
             }
-            val picks = SpotifyRadio.interleave(
-                stations,
-                limit = MAX_MATCHES,
-                exclude = seeds.mapTo(HashSet()) { SpotifyRadio.songKey(it.title, it.artist) },
-            )
+            val (stations, exclude) = if (top.isNotEmpty()) {
+                val stations = coroutineScope {
+                    top.map { seed -> async { picksForSeed(seed, DIAL_TRACKS_PER_SEED) } }.awaitAll()
+                }
+                stations to top.filter { it.isTrack }.mapTo(HashSet()) { SpotifyRadio.songKey(it.title, it.artist) }
+            } else {
+                val played = ListeningStats.recentTracks(DIAL_SEEDS * 2)
+                    .filter { it.title.isNotBlank() && it.artist.isNotBlank() }
+                    .take(DIAL_SEEDS)
+                val stations = coroutineScope {
+                    played.map { seed -> async { picksFor(seed.title, seed.artist, DIAL_TRACKS_PER_SEED) } }.awaitAll()
+                }
+                stations to played.mapTo(HashSet()) { SpotifyRadio.songKey(it.title, it.artist) }
+            }
+            val picks = SpotifyRadio.interleave(stations, limit = MAX_MATCHES, exclude = exclude)
             match(picks).map { song ->
                 ShelfItem(
                     title = song.title,
@@ -99,6 +117,62 @@ object SpotifyRecommendations {
         emptyList()
     }
 
+    @Volatile private var topPool: List<SpotifyTopSeeds.Seed> = emptyList()
+    @Volatile private var topPoolAt = 0L
+    @Volatile private var topPoolAccount = ""
+
+    /**
+     * The account's top songs and artists over the three spans, dealt into
+     * one list. Read again after [TOP_POOL_TTL_MS] or a change of account;
+     * these lists move slowly, so each refresh of the dial doesn't ask.
+     * Empty when none of the three can be read.
+     */
+    private suspend fun topSeedPool(): List<SpotifyTopSeeds.Seed> {
+        val account = AppSettings.spotifySpdcToken.value
+        val now = System.currentTimeMillis()
+        if (topPool.isNotEmpty() && account == topPoolAccount && now - topPoolAt < TOP_POOL_TTL_MS) return topPool
+        val lists = coroutineScope {
+            SpotifyTopRange.entries.map { range ->
+                async {
+                    runCatching { SpotifyLibrary.topContent(range, TOP_PER_RANGE) }
+                        .onFailure { error ->
+                            if (error is CancellationException) throw error
+                            Log.w(TAG, "Spotify top ${range.name.lowercase()} unavailable: ${error.message}")
+                        }
+                        .getOrNull()
+                }
+            }.awaitAll().filterNotNull()
+        }
+        val pool = SpotifyTopSeeds.pool(lists)
+        Log.d(TAG, "Spotify top seeds: ${pool.size} from ${lists.size} spans")
+        if (pool.isNotEmpty()) {
+            topPool = pool
+            topPoolAt = now
+            topPoolAccount = account
+        }
+        return pool
+    }
+
+    /** The tracks of Spotify's station for a top song or artist, named. */
+    private suspend fun picksForSeed(seed: SpotifyTopSeeds.Seed, limit: Int): List<SpotifyRadio.Pick> {
+        val token = SpotifyToken.accessToken() ?: return emptyList()
+        return withContext(Dispatchers.IO) {
+            val headers = stationHeaders(token)
+            var picks = fetch(SpotifyRadio.seedStationUrl(seed.uri, limit), headers, "station")
+            if (picks.isEmpty() && seed.isTrack) {
+                picks = fetch(SpotifyRadio.recommendationsUrl(seed.id, limit), headers, "recommendations")
+            }
+            named(picks.filterNot { it.id == seed.id }, headers)
+                .also { Log.d(TAG, "${it.size} Spotify picks after top ${if (seed.isTrack) "song" else "artist"} '${seed.title.ifBlank { seed.artist }}'") }
+        }
+    }
+
+    private fun stationHeaders(token: String): Map<String, String> = SpotifyLikeSync.headers(token) + mapOf(
+        "App-platform" to "WebPlayer",
+        "Origin" to "https://open.spotify.com",
+        "Referer" to "https://open.spotify.com/",
+    )
+
     /** The tracks of Spotify's station for one song, named. */
     private suspend fun picksFor(title: String, artist: String, limit: Int): List<SpotifyRadio.Pick> {
         if (title.isBlank() || artist.isBlank()) return emptyList()
@@ -109,11 +183,7 @@ object SpotifyRecommendations {
                 Log.d(TAG, "no Spotify match for '$title' by '$artist'")
                 return@withContext emptyList()
             }
-            val headers = SpotifyLikeSync.headers(token) + mapOf(
-                "App-platform" to "WebPlayer",
-                "Origin" to "https://open.spotify.com",
-                "Referer" to "https://open.spotify.com/",
-            )
+            val headers = stationHeaders(token)
             val picks = fetch(SpotifyRadio.stationUrl(seed, limit), headers, "station")
                 .ifEmpty { fetch(SpotifyRadio.recommendationsUrl(seed, limit), headers, "recommendations") }
                 .filterNot { it.id == seed }

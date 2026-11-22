@@ -1472,4 +1472,7 @@
     <string name="episode_filter_in_progress">Devam ediyor</string>
     <string name="episode_filter_played">Oynatıldı</string>
     <string name="episode_filter_none">Bu filtrede bölüm yok.</string>
+    <string name="spotify_dial_seeds">Spotify önerilerinin kaynağı</string>
+    <string name="spotify_dial_seeds_plays">Dial\'daki dinlemeler</string>
+    <string name="spotify_dial_seeds_top">Spotify Top</string>
 </resources>

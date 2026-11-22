@@ -1516,4 +1516,7 @@
     <string name="episode_filter_in_progress">En cours</string>
     <string name="episode_filter_played">Écoutés</string>
     <string name="episode_filter_none">Aucun épisode dans ce filtre.</string>
+    <string name="spotify_dial_seeds">Suggestions Spotify à partir de</string>
+    <string name="spotify_dial_seeds_plays">Écoutes dans Dial</string>
+    <string name="spotify_dial_seeds_top">Top Spotify</string>
 </resources>

@@ -1494,4 +1494,7 @@
     <string name="episode_filter_in_progress">播放中</string>
     <string name="episode_filter_played">已播放</string>
     <string name="episode_filter_none">此篩選條件下沒有單集。</string>
+    <string name="spotify_dial_seeds">Spotify 推薦依據</string>
+    <string name="spotify_dial_seeds_plays">Dial 中的播放</string>
+    <string name="spotify_dial_seeds_top">Spotify 常聽</string>
 </resources>

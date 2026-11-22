@@ -1520,4 +1520,7 @@
     <string name="episode_filter_in_progress">בהשמעה</string>
     <string name="episode_filter_played">הושמעו</string>
     <string name="episode_filter_none">אין פרקים במסנן הזה.</string>
+    <string name="spotify_dial_seeds">ההצעות של Spotify מבוססות על</string>
+    <string name="spotify_dial_seeds_plays">השמעות ב-Dial</string>
+    <string name="spotify_dial_seeds_top">הטופ ב-Spotify</string>
 </resources>

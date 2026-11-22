@@ -1547,4 +1547,7 @@
     <string name="episode_filter_in_progress">Начаты</string>
     <string name="episode_filter_played">Прослушаны</string>
     <string name="episode_filter_none">Нет выпусков с этим фильтром.</string>
+    <string name="spotify_dial_seeds">Подборка Spotify на основе</string>
+    <string name="spotify_dial_seeds_plays">Прослушивания в Dial</string>
+    <string name="spotify_dial_seeds_top">Топ Spotify</string>
 </resources>

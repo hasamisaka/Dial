@@ -1498,4 +1498,7 @@
     <string name="episode_filter_in_progress">กำลังเล่น</string>
     <string name="episode_filter_played">เล่นแล้ว</string>
     <string name="episode_filter_none">ไม่มีตอนในตัวกรองนี้</string>
+    <string name="spotify_dial_seeds">คำแนะนำของ Spotify จาก</string>
+    <string name="spotify_dial_seeds_plays">การเล่นใน Dial</string>
+    <string name="spotify_dial_seeds_top">ท็อปของ Spotify</string>
 </resources>

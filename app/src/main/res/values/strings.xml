@@ -1357,4 +1357,7 @@
     <string name="episode_filter_in_progress">In progress</string>
     <string name="episode_filter_played">Played</string>
     <string name="episode_filter_none">No episodes in this filter.</string>
+    <string name="spotify_dial_seeds">Spotify picks from</string>
+    <string name="spotify_dial_seeds_plays">Plays in Dial</string>
+    <string name="spotify_dial_seeds_top">Spotify top</string>
 </resources>

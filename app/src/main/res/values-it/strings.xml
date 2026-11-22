@@ -1454,4 +1454,7 @@
     <string name="episode_filter_in_progress">In corso</string>
     <string name="episode_filter_played">Riprodotti</string>
     <string name="episode_filter_none">Nessun episodio con questo filtro.</string>
+    <string name="spotify_dial_seeds">Suggerimenti Spotify da</string>
+    <string name="spotify_dial_seeds_plays">Ascolti in Dial</string>
+    <string name="spotify_dial_seeds_top">Top Spotify</string>
 </resources>

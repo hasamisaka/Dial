@@ -1493,4 +1493,7 @@
     <string name="episode_filter_in_progress">再生中</string>
     <string name="episode_filter_played">再生済み</string>
     <string name="episode_filter_none">この条件のエピソードはありません。</string>
+    <string name="spotify_dial_seeds">Spotify のおすすめの元</string>
+    <string name="spotify_dial_seeds_plays">Dial での再生</string>
+    <string name="spotify_dial_seeds_top">Spotify のトップ</string>
 </resources>

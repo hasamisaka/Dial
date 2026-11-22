@@ -77,6 +77,10 @@ class SpotifyRadioTest {
             "https://spclient.wg.spotify.com/radio-apollo/v3/stations/spotify:track:abc?count=20&autoplay=true",
             SpotifyRadio.stationUrl("abc", 20),
         )
+        assertEquals(
+            "https://spclient.wg.spotify.com/radio-apollo/v3/stations/spotify:artist:xyz?count=12&autoplay=true",
+            SpotifyRadio.seedStationUrl("spotify:artist:xyz", 12),
+        )
         assertEquals("https://api.spotify.com/v1/recommendations?seed_tracks=abc&limit=100", SpotifyRadio.recommendationsUrl("abc", 500))
         assertEquals("https://api.spotify.com/v1/tracks?ids=a,b", SpotifyRadio.tracksUrl(listOf("a", "b")))
     }
