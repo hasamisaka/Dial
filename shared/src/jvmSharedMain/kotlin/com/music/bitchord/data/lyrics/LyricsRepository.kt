@@ -22,6 +22,8 @@ import java.util.concurrent.ConcurrentHashMap
  *  - [BetterLyrics], [PaxSenix] and [BiniLyrics] — Apple Music TTML,
  *    per-syllable, from three independent hosts so one having a bad day
  *    doesn't cost the timing.
+ *  - [SpotifyLyrics] — Spotify's own lyrics, with the listener's own Spotify
+ *    sign-in; nothing at all when nobody is signed in.
  *  - [LyricsPlus] — the YouLy+ backend; finest timing of the lot, flakiest hosting.
  *  - [SimpMusicLyrics] — keyed on the video id, so it can't fetch the wrong edit.
  *  - [Unison] — contributed rather than licensed; thin, and occasionally the
@@ -227,6 +229,7 @@ object LyricsRepository {
             LyricsSource.LRCLIB -> LrcLib.lyrics(title, artist, durationMs)
             LyricsSource.MUSIXMATCH -> Musixmatch.lyrics(title, artist, durationMs)
             LyricsSource.PAXSENIX -> PaxSenix.lyrics(title, artist, durationMs, album)
+            LyricsSource.SPOTIFY -> SpotifyLyrics.lyrics(title, artist, durationMs)
             LyricsSource.PAXSENIX_SPOTIFY -> PaxSenix.spotifyLyrics(title, artist, durationMs)
             LyricsSource.PAXSENIX_MUSIXMATCH -> PaxSenix.musixmatchLyrics(title, artist, durationMs)
             LyricsSource.KUGOU -> KuGou.lyrics(title, artist, durationMs, album)
