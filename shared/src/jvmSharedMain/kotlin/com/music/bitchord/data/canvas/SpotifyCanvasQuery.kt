@@ -21,17 +21,14 @@ import kotlinx.serialization.json.putJsonObject
  * share it and it can be tested without a network; each app sends the request with its own client.
  *
  * Like every Pathfinder operation, the query is named by a persisted-query hash that changes when
- * Spotify rebuilds the web player. [KNOWN_CANVAS_HASH] is the last one known to work; the live one
- * is read out of the web player's own scripts by [QueryHashes], so a rebuild doesn't silently take
- * the source down again.
+ * Spotify rebuilds the web player. The live one comes from
+ * [SpotifyQueryHashes][com.music.bitchord.data.spotify.SpotifyQueryHashes], so a rebuild doesn't
+ * silently take the source down again.
  */
 object SpotifyCanvasQuery {
 
     const val ENDPOINT = "https://api-partner.spotify.com/pathfinder/v2/query"
-    const val OPERATION = "canvas"
-
-    /** The `canvas` query's hash as of January 2026. */
-    const val KNOWN_CANVAS_HASH = "575138ab27cd5c1b3e54da54d0a7cc8d85485402de26340c2145f0f6bb5e7a9f"
+    const val OPERATION = com.music.bitchord.data.spotify.SpotifyQueryHashes.CANVAS
 
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
@@ -89,75 +86,6 @@ object SpotifyCanvasQuery {
     }
 
     private val VIDEO_URL = Regex("""\.mp4(?:[?#]|$)""", RegexOption.IGNORE_CASE)
-
-    // ---- The live hash --------------------------------------------------
-
-    /**
-     * `"canvas","query","<64 hex>"`, the way the web player's bundle declares its operations;
-     * mutations (`"addToLibrary","mutation",…`) are declared the same way.
-     */
-    private val OPERATION_DECLARATION =
-        Regex("""["'](\w+)["']\s*,\s*["'](?:query|mutation)["']\s*,\s*["']([0-9a-f]{64})["']""")
-
-    /** [operation]'s hash as declared in a piece of the web player's JavaScript, if it's there. */
-    fun findQueryHash(script: String, operation: String = OPERATION): String? =
-        OPERATION_DECLARATION.findAll(script).firstOrNull { it.groupValues[1] == operation }?.groupValues?.get(2)
-
-    /** The web player's own script bundles, as linked from open.spotify.com's page. */
-    fun webPlayerScripts(html: String): List<String> =
-        WEB_PLAYER_SCRIPT.findAll(html).map { it.value }.distinct().toList()
-
-    private val WEB_PLAYER_SCRIPT =
-        Regex("""https://open\.spotifycdn\.com/cdn/build/web-player/[A-Za-z0-9._~-]+\.js""")
-
-    /**
-     * The current `canvas` hash, read off the web player's scripts and remembered for a while.
-     *
-     * [fetch] is the app's own GET (URL in, body out, null on failure), so this holds no HTTP
-     * client of its own. Falls back to [KNOWN_CANVAS_HASH] whenever the scripts can't be read or
-     * no longer declare it where expected, and doesn't retry a failed lookup on every track.
-     */
-    class QueryHashes(
-        private val fetch: (String) -> String?,
-        private val now: () -> Long = System::currentTimeMillis,
-        private val maxScripts: Int = 8,
-        /** The operation whose hash this tracks; [canvasHash] is named for the default. */
-        private val operation: String = OPERATION,
-        private val fallback: String = KNOWN_CANVAS_HASH,
-    ) {
-        @Volatile private var hash: String? = null
-        @Volatile private var checkedAt = 0L
-
-        @Synchronized
-        fun canvasHash(forceRefresh: Boolean = false): String {
-            val current = hash
-            val age = now() - checkedAt
-            if (!forceRefresh && checkedAt != 0L && age < (if (current != null) FOUND_TTL_MS else MISSED_TTL_MS)) {
-                return current ?: fallback
-            }
-            checkedAt = now()
-            val found = lookUp()
-            if (found != null) hash = found
-            return hash ?: fallback
-        }
-
-        /** The same as [canvasHash], for a tracker built for another [operation]. */
-        fun hash(forceRefresh: Boolean = false): String = canvasHash(forceRefresh)
-
-        private fun lookUp(): String? {
-            val html = fetch("https://open.spotify.com/") ?: return null
-            for (script in webPlayerScripts(html).take(maxScripts)) {
-                val body = fetch(script) ?: continue
-                findQueryHash(body, operation)?.let { return it }
-            }
-            return null
-        }
-
-        private companion object {
-            const val FOUND_TTL_MS = 12L * 60 * 60 * 1000
-            const val MISSED_TTL_MS = 30L * 60 * 1000
-        }
-    }
 
     private fun JsonObject.text(key: String): String? =
         (this[key] as? JsonPrimitive)?.takeUnless { it is JsonNull }?.contentOrNull

@@ -4,10 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.music.bitchord.data.DebugLog as Log
 import com.music.bitchord.data.Http
-import com.music.bitchord.data.canvas.CANVAS_UA
 import com.music.bitchord.data.canvas.SpotifyCanvasQuery
 import com.music.bitchord.data.canvas.SpotifyToken
-import com.music.bitchord.data.canvas.canvasGet
 import com.music.bitchord.data.model.Song
 import com.music.bitchord.data.settings.AppSettings
 import kotlinx.coroutines.CoroutineScope
@@ -60,14 +58,6 @@ object SpotifyPlayedSync {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val lock = Mutex()
     private val jsonType = "application/json".toMediaType()
-
-    private val scriptFetch: (String) -> String? = { url -> canvasGet(url, mapOf("User-Agent" to CANVAS_UA)) }
-    private val addHash = hashes(SpotifyPlayedList.ADD_OPERATION, SpotifyPlayedList.KNOWN_ADD_HASH)
-    private val removeHash = hashes(SpotifyPlayedList.REMOVE_OPERATION, SpotifyPlayedList.KNOWN_REMOVE_HASH)
-    private val profileHash = hashes(SpotifyPlayedList.PROFILE_OPERATION, SpotifyPlayedList.KNOWN_PROFILE_HASH)
-
-    private fun hashes(operation: String, fallback: String) =
-        SpotifyCanvasQuery.QueryHashes(fetch = scriptFetch, operation = operation, fallback = fallback)
 
     @Volatile private var prefs: SharedPreferences? = null
 
@@ -159,7 +149,7 @@ object SpotifyPlayedSync {
 
     private fun addViaWeb(playlistId: String, uri: String, headers: Map<String, String>, isRetry: Boolean = false): String? {
         if ("Client-Token" !in headers) return "no client token"
-        val hash = addHash.hash(forceRefresh = isRetry)
+        val hash = SpotifyQueryHashes.hash(SpotifyPlayedList.ADD_OPERATION, forceRefresh = isRetry)
         val (code, body) = pathfinder(SpotifyPlayedList.webAddBody(playlistId, uri, hash), headers)
         if (body == null) return "http $code"
         return when (val answer = SpotifyPlayedList.webAdded(body)) {
@@ -217,7 +207,7 @@ object SpotifyPlayedSync {
 
     private fun removeViaWeb(playlistId: String, uids: List<String>, headers: Map<String, String>, isRetry: Boolean = false): String? {
         if ("Client-Token" !in headers) return "no client token"
-        val hash = removeHash.hash(forceRefresh = isRetry)
+        val hash = SpotifyQueryHashes.hash(SpotifyPlayedList.REMOVE_OPERATION, forceRefresh = isRetry)
         val (code, body) = pathfinder(SpotifyPlayedList.webRemoveBody(playlistId, uids, hash), headers)
         if (body == null) return "http $code"
         return when (val answer = SpotifyPlayedList.webRemoved(body)) {
@@ -310,7 +300,7 @@ object SpotifyPlayedSync {
 
     private fun username(headers: Map<String, String>, isRetry: Boolean = false): String? {
         if ("Client-Token" !in headers) return null
-        val hash = profileHash.hash(forceRefresh = isRetry)
+        val hash = SpotifyQueryHashes.hash(SpotifyPlayedList.PROFILE_OPERATION, forceRefresh = isRetry)
         val body = pathfinder(SpotifyPlayedList.queryBody(SpotifyPlayedList.PROFILE_OPERATION, hash), headers).second
         val name = body?.let(SpotifyPlayedList::username)
         return if (name == null && !isRetry) username(headers, isRetry = true) else name

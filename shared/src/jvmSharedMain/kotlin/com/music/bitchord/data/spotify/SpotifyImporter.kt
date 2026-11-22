@@ -181,7 +181,6 @@ object SpotifyImporter {
     private const val EMBED_TRACK_LIMIT = 100
     private const val PAGE_SIZE = 100
     private const val PATHFINDER_URL = "https://api-partner.spotify.com/pathfinder/v1/query"
-    private const val FETCH_PLAYLIST_HASH = "19ff1327c29e99c208c86d7a9d8f1929cfdf3d3202a0ff4253c821f1901aa94d"
 
     /** Tracks from [start] to the end of the playlist, a page at a time. */
     private fun fetchRemainingTracks(
@@ -191,9 +190,12 @@ object SpotifyImporter {
     ): List<SpotifyImportTrack> {
         val out = mutableListOf<SpotifyImportTrack>()
         var offset = start
+        // The live hash; read again once when Spotify does not know it.
+        var hash = SpotifyQueryHashes.hash(SpotifyQueryHashes.FETCH_PLAYLIST)
+        var refreshed = false
         while (true) {
             val variables = """{"uri":"spotify:playlist:$playlistId","offset":$offset,"limit":$PAGE_SIZE,"enableWatchFeedEntrypoint":false}"""
-            val extensions = """{"persistedQuery":{"version":1,"sha256Hash":"$FETCH_PLAYLIST_HASH"}}"""
+            val extensions = """{"persistedQuery":{"version":1,"sha256Hash":"$hash"}}"""
             val url = PATHFINDER_URL.toHttpUrl().newBuilder()
                 .addQueryParameter("operationName", "fetchPlaylist")
                 .addQueryParameter("variables", variables)
@@ -206,10 +208,18 @@ object SpotifyImporter {
                 .header("App-platform", "WebPlayer")
                 .header("Accept", "application/json")
                 .build()
-            val body = Http.client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) error("HTTP ${response.code}")
-                response.body?.string().orEmpty()
+            val (code, body) = Http.client.newCall(request).execute().use { response ->
+                response.code to response.body?.string().orEmpty()
             }
+            if (SpotifyQueryHashes.isStale(body) && !refreshed) {
+                refreshed = true
+                val fresh = SpotifyQueryHashes.hash(SpotifyQueryHashes.FETCH_PLAYLIST, forceRefresh = true)
+                if (fresh != hash) {
+                    hash = fresh
+                    continue
+                }
+            }
+            if (code !in 200..299) error("HTTP $code")
             val content = json.parseToJsonElement(body).jsonObject["data"]?.jsonObject
                 ?.get("playlistV2")?.jsonObject?.get("content")?.jsonObject
                 ?: break

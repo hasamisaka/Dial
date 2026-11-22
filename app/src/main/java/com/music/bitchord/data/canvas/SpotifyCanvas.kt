@@ -2,6 +2,7 @@ package com.music.bitchord.data.canvas
 
 import com.music.bitchord.data.DebugLog as Log
 import com.music.bitchord.data.Http
+import com.music.bitchord.data.spotify.SpotifyQueryHashes
 import com.google.protobuf.CodedInputStream
 import com.google.protobuf.CodedOutputStream
 import kotlinx.serialization.json.Json
@@ -46,10 +47,6 @@ object SpotifyCanvas {
     private const val ALBUM_TRACKS_URL = "https://api.spotify.com/v1/albums"
     private const val CANVAS_URL = "https://spclient.wg.spotify.com/canvaz-cache/v0/canvases"
     private const val PATHFINDER_URL = "https://api-partner.spotify.com/pathfinder/v1/query"
-
-    /** The persisted query id for the web player's own track search. */
-    private const val PATHFINDER_SEARCH_HASH =
-        "bc1ca2fcd0ba1013a0fc88e6cc4f190af501851e3dafd3e1ef85840297694428"
 
     /**
      * spclient gates this path to Spotify's own apps by user agent; the web
@@ -107,7 +104,13 @@ object SpotifyCanvas {
      * the same way [firstTrackUri] trusts an album's own track listing rather
      * than re-checking it.
      */
-    private fun searchViaPathfinder(title: String, artist: String, album: String?, token: String): TrackHit? {
+    private fun searchViaPathfinder(
+        title: String,
+        artist: String,
+        album: String?,
+        token: String,
+        isRetry: Boolean = false,
+    ): TrackHit? {
         val clientToken = SpotifyToken.clientToken()
         if (clientToken == null) {
             Log.d(TAG, "no client token; skipping pathfinder search")
@@ -125,7 +128,7 @@ object SpotifyCanvas {
         val extensions = buildJsonObject {
             putJsonObject("persistedQuery") {
                 put("version", 1)
-                put("sha256Hash", PATHFINDER_SEARCH_HASH)
+                put("sha256Hash", SpotifyQueryHashes.hash(SpotifyQueryHashes.SEARCH_TRACKS, forceRefresh = isRetry))
             }
         }.toString()
 
@@ -143,8 +146,10 @@ object SpotifyCanvas {
             "Accept" to "application/json",
             "User-Agent" to CANVAS_UA,
         )
-        val (code, body) = canvasGetWithStatus(url, headers)
-        if (body == null) {
+        val (code, body) = canvasGetWithStatus(url, headers, keepErrorBody = true)
+        // A rebuilt web player retires the old hash: look it up again once.
+        if (SpotifyQueryHashes.isStale(body) && !isRetry) return searchViaPathfinder(title, artist, album, token, isRetry = true)
+        if (body == null || code !in 200..299) {
             Log.w(TAG, "pathfinder search failed, http $code")
             return null
         }
@@ -286,11 +291,6 @@ object SpotifyCanvas {
 
     // ---- Pathfinder: the `canvas` GraphQL query ------------------------
 
-    /** The live `canvas` query hash, read off the web player's own scripts. */
-    private val queryHashes = SpotifyCanvasQuery.QueryHashes(
-        fetch = { url -> canvasGet(url, mapOf("User-Agent" to CANVAS_UA)) },
-    )
-
     /**
      * The track's canvas, asked for the way the current web player does; the
      * older `canvaz-cache` endpoint only when that query fails outright (not
@@ -315,7 +315,7 @@ object SpotifyCanvas {
         }
 
     private fun fetchCanvasViaPathfinder(trackUri: String, token: String, isRetry: Boolean = false): SpotifyCanvasQuery.Answer {
-        val hash = queryHashes.canvasHash(forceRefresh = isRetry)
+        val hash = SpotifyQueryHashes.hash(SpotifyQueryHashes.CANVAS, forceRefresh = isRetry)
         val request = Request.Builder()
             .url(SpotifyCanvasQuery.ENDPOINT)
             .post(SpotifyCanvasQuery.requestBody(trackUri, hash).toRequestBody("application/json".toMediaType()))

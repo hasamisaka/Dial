@@ -5,7 +5,6 @@ import com.music.bitchord.data.Http
 import com.music.bitchord.data.canvas.CANVAS_UA
 import com.music.bitchord.data.canvas.SpotifyCanvasQuery
 import com.music.bitchord.data.canvas.SpotifyToken
-import com.music.bitchord.data.canvas.canvasGet
 import com.music.bitchord.data.canvas.canvasGetWithStatus
 import com.music.bitchord.data.settings.AppSettings
 import kotlinx.coroutines.CoroutineScope
@@ -39,22 +38,10 @@ object SpotifyLikeSync {
 
     private const val TAG = "SpotifyLikeSync"
     private const val PATHFINDER_V1 = "https://api-partner.spotify.com/pathfinder/v1/query"
-    private const val SEARCH_HASH = "bc1ca2fcd0ba1013a0fc88e6cc4f190af501851e3dafd3e1ef85840297694428"
     private const val REST_SEARCH = "https://api.spotify.com/v1/search"
     private const val REST_SAVED_TRACKS = "https://api.spotify.com/v1/me/tracks"
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val scriptFetch: (String) -> String? = { url -> canvasGet(url, mapOf("User-Agent" to CANVAS_UA)) }
-    private val addHash = SpotifyCanvasQuery.QueryHashes(
-        fetch = scriptFetch,
-        operation = SpotifyLikeMirror.ADD_OPERATION,
-        fallback = SpotifyLikeMirror.KNOWN_ADD_HASH,
-    )
-    private val removeHash = SpotifyCanvasQuery.QueryHashes(
-        fetch = scriptFetch,
-        operation = SpotifyLikeMirror.REMOVE_OPERATION,
-        fallback = SpotifyLikeMirror.KNOWN_REMOVE_HASH,
-    )
 
     /**
      * Likes ([liked] true) or un-likes [title] by [artist] on Spotify, in the
@@ -112,7 +99,7 @@ object SpotifyLikeSync {
         return Search(rest.uri, web.answered || rest.answered)
     }
 
-    private fun searchViaPathfinder(title: String, artist: String, token: String): Search {
+    private fun searchViaPathfinder(title: String, artist: String, token: String, isRetry: Boolean = false): Search {
         val headers = headers(token)
         if ("Client-Token" !in headers) return Search(null, answered = false)
         val variables = buildJsonObject {
@@ -126,7 +113,7 @@ object SpotifyLikeSync {
         val extensions = buildJsonObject {
             putJsonObject("persistedQuery") {
                 put("version", 1)
-                put("sha256Hash", SEARCH_HASH)
+                put("sha256Hash", SpotifyQueryHashes.hash(SpotifyQueryHashes.SEARCH_TRACKS, forceRefresh = isRetry))
             }
         }.toString()
         val url = PATHFINDER_V1.toHttpUrl().newBuilder()
@@ -134,8 +121,10 @@ object SpotifyLikeSync {
             .addQueryParameter("variables", variables)
             .addQueryParameter("extensions", extensions)
             .build().toString()
-        val (code, body) = canvasGetWithStatus(url, headers + ("App-platform" to "WebPlayer"))
-        if (body == null) {
+        val (code, body) = canvasGetWithStatus(url, headers + ("App-platform" to "WebPlayer"), keepErrorBody = true)
+        // A rebuilt web player retires the old hash: look it up again once.
+        if (SpotifyQueryHashes.isStale(body) && !isRetry) return searchViaPathfinder(title, artist, token, isRetry = true)
+        if (body == null || code !in 200..299) {
             Log.w(TAG, "pathfinder search failed, http $code")
             return Search(null, answered = false)
         }
@@ -164,7 +153,7 @@ object SpotifyLikeSync {
         val headers = headers(token)
         if ("Client-Token" !in headers) return false
         val operation = if (liked) SpotifyLikeMirror.ADD_OPERATION else SpotifyLikeMirror.REMOVE_OPERATION
-        val hash = (if (liked) addHash else removeHash).hash(forceRefresh = isRetry)
+        val hash = SpotifyQueryHashes.hash(operation, forceRefresh = isRetry)
         val request = Request.Builder()
             .url(SpotifyCanvasQuery.ENDPOINT)
             .post(
