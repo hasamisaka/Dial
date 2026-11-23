@@ -196,6 +196,8 @@ class BitChordApplication : Application(), SingletonImageLoader.Factory, Configu
         // suspend call chain that reaches it (a track's canvas lookup) has
         // one to hand — see SpotifyToken's doc for why.
         SpotifyToken.init(this)
+        // Spotify's own lyrics, asked with the same sign-in; see SpotifyLyrics.
+        com.music.bitchord.data.spotify.SpotifyAccountLyrics.install()
         com.music.bitchord.data.spotify.SpotifyPlayedSync.init(this)
         // A sideloaded update is just a new APK over the old one, so app data —
         // including whatever the old build left in the image cache — survives

@@ -65,6 +65,14 @@ enum class LyricsSource(
         detail = "Apple Music timings through the original keyless provider",
         wordSynced = true,
     ),
+    // Directly ahead of [PAXSENIX_SPOTIFY]: the same Spotify lyrics, asked
+    // with the listener's own sign-in, so the keyed route behind it is the
+    // fallback rather than the first try.
+    SPOTIFY(
+        label = "Spotify",
+        detail = "Spotify lyrics with your own Spotify sign-in",
+        wordSynced = true,
+    ),
     PAXSENIX_SPOTIFY(
         label = "PaxSenix: Spotify",
         detail = "Spotify lyrics with PaxSenix fallback; API key required",
