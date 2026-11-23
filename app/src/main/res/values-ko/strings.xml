@@ -1280,4 +1280,9 @@
     <string name="episode_filter_in_progress">재생 중</string>
     <string name="episode_filter_played">재생함</string>
     <string name="episode_filter_none">이 필터에 해당하는 에피소드가 없습니다.</string>
+    <string name="account_plan">요금제</string>
+    <string name="account_plan_checking">확인 중…</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">무료</string>
+    <string name="account_plan_unknown">알 수 없음. 눌러서 다시 확인</string>
 </resources>

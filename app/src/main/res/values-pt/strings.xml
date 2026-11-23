@@ -1520,4 +1520,9 @@
     <string name="episode_filter_in_progress">Em andamento</string>
     <string name="episode_filter_played">Reproduzidos</string>
     <string name="episode_filter_none">Nenhum episódio neste filtro.</string>
+    <string name="account_plan">Plano</string>
+    <string name="account_plan_checking">Verificando…</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">Gratuito</string>
+    <string name="account_plan_unknown">Desconhecido. Toque para verificar de novo</string>
 </resources>

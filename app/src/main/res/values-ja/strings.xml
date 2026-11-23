@@ -1493,4 +1493,9 @@
     <string name="episode_filter_in_progress">再生中</string>
     <string name="episode_filter_played">再生済み</string>
     <string name="episode_filter_none">この条件のエピソードはありません。</string>
+    <string name="account_plan">プラン</string>
+    <string name="account_plan_checking">確認中…</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">無料</string>
+    <string name="account_plan_unknown">不明。タップしてもう一度確認</string>
 </resources>

@@ -21,10 +21,12 @@ import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.LibraryMusic
 import androidx.compose.material.icons.rounded.SwitchAccount
 import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.material3.MaterialTheme
 import com.music.bitchord.ui.components.IosSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +38,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.music.bitchord.R
+import com.music.bitchord.data.AccountPlan
+import com.music.bitchord.data.AccountPlanState
 import com.music.bitchord.data.model.Account
 import com.music.bitchord.data.settings.AppSettings
 import com.music.bitchord.ui.components.maskedUsername
@@ -77,6 +81,14 @@ fun AccountAndScrobblingScreen(
     val spotifyPlayedPlaylist by AppSettings.spotifyPlayedPlaylist.collectAsStateWithLifecycle()
     val hideUserInfo by AppSettings.hideUserInfo.collectAsStateWithLifecycle()
     var showPlayedPlaylist by remember { mutableStateOf(false) }
+    val youtubePlan by AccountPlanState.youtube.collectAsStateWithLifecycle()
+    val spotifyPlan by AccountPlanState.spotify.collectAsStateWithLifecycle()
+    // Which account (and channel) the YouTube plan line is for: a new one is checked again.
+    val youtubePlanKey = "${account?.email}|${account?.name}|$channelName"
+    LaunchedEffect(signedIn, youtubePlanKey) {
+        if (signedIn) AccountPlanState.checkYoutube(youtubePlanKey)
+    }
+    LaunchedEffect(spotifyConnected) { AccountPlanState.checkSpotify(spotifyConnected) }
     if (showPlayedPlaylist) PlayedInDialDialog(onDismiss = { showPlayedPlaylist = false })
 
     Column(
@@ -114,6 +126,11 @@ fun AccountAndScrobblingScreen(
                     onClick = onSwitchChannel,
                 )
                 FullWidthDivider()
+                AccountPlanRow(
+                    plan = youtubePlan,
+                    onClick = { AccountPlanState.checkYoutube(youtubePlanKey, force = true) },
+                )
+                FullWidthDivider()
                 DestructiveRow(label = stringResource(R.string.sign_out), danger = true, onClick = onSignOut)
             }
         }
@@ -131,6 +148,11 @@ fun AccountAndScrobblingScreen(
                 onClick = onOpenSpotify,
             )
             if (spotifyConnected.isNotBlank()) {
+                RowDivider()
+                AccountPlanRow(
+                    plan = spotifyPlan,
+                    onClick = { AccountPlanState.checkSpotify(spotifyConnected, force = true) },
+                )
                 RowDivider()
                 SettingsRow(
                     icon = Icons.Rounded.GraphicEq,
@@ -377,4 +399,25 @@ fun AccountAndScrobblingScreen(
 @Composable
 private fun FullWidthDivider() {
     HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline)
+}
+
+/**
+ * The plan line of an account: Premium, Free, or Unknown when the service did not say.
+ * "Checking" while [plan] is null. A tap checks again.
+ */
+@Composable
+private fun AccountPlanRow(plan: AccountPlan?, onClick: () -> Unit) {
+    SettingsRow(
+        icon = Icons.Rounded.WorkspacePremium,
+        title = stringResource(R.string.account_plan),
+        subtitle = stringResource(
+            when (plan) {
+                null -> R.string.account_plan_checking
+                AccountPlan.PREMIUM -> R.string.account_plan_premium
+                AccountPlan.FREE -> R.string.account_plan_free
+                AccountPlan.UNKNOWN -> R.string.account_plan_unknown
+            },
+        ),
+        onClick = onClick,
+    )
 }

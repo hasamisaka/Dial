@@ -1555,4 +1555,9 @@
     <string name="episode_filter_in_progress">W trakcie</string>
     <string name="episode_filter_played">Odtworzone</string>
     <string name="episode_filter_none">Brak odcinków w tym filtrze.</string>
+    <string name="account_plan">Plan</string>
+    <string name="account_plan_checking">Sprawdzanie…</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">Darmowy</string>
+    <string name="account_plan_unknown">Nieznany. Stuknij, by sprawdzić ponownie</string>
 </resources>

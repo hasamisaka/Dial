@@ -1515,4 +1515,9 @@
     <string name="episode_filter_in_progress">जारी</string>
     <string name="episode_filter_played">चलाए गए</string>
     <string name="episode_filter_none">इस फ़िल्टर में कोई एपिसोड नहीं।</string>
+    <string name="account_plan">प्लान</string>
+    <string name="account_plan_checking">जाँच हो रही है…</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">मुफ़्त</string>
+    <string name="account_plan_unknown">अज्ञात। फिर से जाँचने के लिए टैप करें</string>
 </resources>

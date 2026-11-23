@@ -1492,4 +1492,9 @@
     <string name="episode_filter_in_progress">播放中</string>
     <string name="episode_filter_played">已播放</string>
     <string name="episode_filter_none">此筛选条件下没有单集。</string>
+    <string name="account_plan">方案</string>
+    <string name="account_plan_checking">正在检查…</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">免费</string>
+    <string name="account_plan_unknown">未知。点按以重新检查</string>
 </resources>

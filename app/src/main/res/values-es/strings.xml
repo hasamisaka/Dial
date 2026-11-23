@@ -1487,4 +1487,9 @@
     <string name="episode_filter_in_progress">En curso</string>
     <string name="episode_filter_played">Reproducidos</string>
     <string name="episode_filter_none">No hay episodios con este filtro.</string>
+    <string name="account_plan">Plan</string>
+    <string name="account_plan_checking">Comprobando…</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">Gratis</string>
+    <string name="account_plan_unknown">Desconocido. Toca para volver a comprobar</string>
 </resources>

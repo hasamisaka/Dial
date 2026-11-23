@@ -1498,4 +1498,9 @@
     <string name="episode_filter_in_progress">กำลังเล่น</string>
     <string name="episode_filter_played">เล่นแล้ว</string>
     <string name="episode_filter_none">ไม่มีตอนในตัวกรองนี้</string>
+    <string name="account_plan">แพ็กเกจ</string>
+    <string name="account_plan_checking">กำลังตรวจสอบ…</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">ฟรี</string>
+    <string name="account_plan_unknown">ไม่ทราบ แตะเพื่อตรวจสอบอีกครั้ง</string>
 </resources>

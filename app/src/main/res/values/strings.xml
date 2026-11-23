@@ -1357,4 +1357,9 @@
     <string name="episode_filter_in_progress">In progress</string>
     <string name="episode_filter_played">Played</string>
     <string name="episode_filter_none">No episodes in this filter.</string>
+    <string name="account_plan">Plan</string>
+    <string name="account_plan_checking">Checking…</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">Free</string>
+    <string name="account_plan_unknown">Unknown. Tap to check again</string>
 </resources>

@@ -1492,4 +1492,9 @@
     <string name="episode_filter_in_progress">Sedang diputar</string>
     <string name="episode_filter_played">Sudah diputar</string>
     <string name="episode_filter_none">Tidak ada episode di filter ini.</string>
+    <string name="account_plan">Paket</string>
+    <string name="account_plan_checking">Memeriksa…</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">Gratis</string>
+    <string name="account_plan_unknown">Tidak diketahui. Ketuk untuk memeriksa lagi</string>
 </resources>

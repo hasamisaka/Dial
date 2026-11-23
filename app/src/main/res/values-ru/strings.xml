@@ -1547,4 +1547,9 @@
     <string name="episode_filter_in_progress">Начаты</string>
     <string name="episode_filter_played">Прослушаны</string>
     <string name="episode_filter_none">Нет выпусков с этим фильтром.</string>
+    <string name="account_plan">Тариф</string>
+    <string name="account_plan_checking">Проверка…</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">Бесплатный</string>
+    <string name="account_plan_unknown">Неизвестно. Нажмите, чтобы проверить снова</string>
 </resources>

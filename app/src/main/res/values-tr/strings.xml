@@ -1472,4 +1472,9 @@
     <string name="episode_filter_in_progress">Devam ediyor</string>
     <string name="episode_filter_played">Oynatıldı</string>
     <string name="episode_filter_none">Bu filtrede bölüm yok.</string>
+    <string name="account_plan">Plan</string>
+    <string name="account_plan_checking">Denetleniyor…</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">Ücretsiz</string>
+    <string name="account_plan_unknown">Bilinmiyor. Yeniden denetlemek için dokun</string>
 </resources>

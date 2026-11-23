@@ -1454,4 +1454,9 @@
     <string name="episode_filter_in_progress">In corso</string>
     <string name="episode_filter_played">Riprodotti</string>
     <string name="episode_filter_none">Nessun episodio con questo filtro.</string>
+    <string name="account_plan">Piano</string>
+    <string name="account_plan_checking">Verifica in corso…</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">Gratuito</string>
+    <string name="account_plan_unknown">Sconosciuto. Tocca per verificare di nuovo</string>
 </resources>

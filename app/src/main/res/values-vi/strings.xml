@@ -1429,4 +1429,9 @@
     <string name="episode_filter_in_progress">Đang nghe dở</string>
     <string name="episode_filter_played">Đã phát</string>
     <string name="episode_filter_none">Không có tập nào trong bộ lọc này.</string>
+    <string name="account_plan">Gói</string>
+    <string name="account_plan_checking">Đang kiểm tra…</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">Miễn phí</string>
+    <string name="account_plan_unknown">Không rõ. Nhấn để kiểm tra lại</string>
 </resources>
