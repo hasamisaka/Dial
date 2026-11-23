@@ -2137,6 +2137,16 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             }
         }
         viewModelScope.launch {
+            // "Hide AI music" switched, or its lists came in: Home and Explore
+            // were read with the old lists. Read at most once a second, as the
+            // switch and its first lists come close together.
+            com.music.bitchord.data.aimusic.AiMusicFilter.changes.drop(1).collectLatest {
+                kotlinx.coroutines.delay(1_000)
+                refresh(Feed.HOME)
+                loadExplore()
+            }
+        }
+        viewModelScope.launch {
             AppSettings.webdavUrl.drop(1).collect {
                 reloadRemoteDetail(com.music.bitchord.data.webdav.WebDavConfig.BROWSE_ID)
             }
@@ -2624,6 +2634,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             // one is fetched and swapped in behind it.
             val cached = withContext(Dispatchers.IO) {
                 com.music.bitchord.data.HomeDiskCache.read(getApplication(), identity)
+                    ?.let(com.music.bitchord.data.aimusic.AiMusicFilter::shelves)
             }
             if (cached != null && isCurrentHomeLoad(identity, generation) && _home.value !is UiState.Success) {
                 _home.value = UiState.Success(cached)

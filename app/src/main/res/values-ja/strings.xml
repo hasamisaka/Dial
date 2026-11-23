@@ -268,6 +268,9 @@
     <string name="high_performance_battery_needed">Dialのバッテリー使用を「制限なし」に設定してください。ここをタップすると設定が開きます。</string>
     <string name="disable_haptics">触覚フィードバックを無効にする</string>
     <string name="disable_haptics_subtitle">Dialのすべての振動フィードバックを停止します</string>
+    <string name="hide_ai_music">AI音楽を非表示</string>
+    <string name="hide_ai_music_subtitle" formatted="false">既知のAIアーティストの曲を検索、ホーム、ミックス、ラジオから除外します。このフィルターは100%有効ではありません。</string>
+    <string name="hide_ai_music_sources">リスト: Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist。Dialは1日1回リストを更新します。</string>
     <string name="static_background">背景色を静止</string>
     <string name="static_background_subtitle">アプリのページの背景にある色の動きを止めます</string>
     <string name="enable">有効にする</string>

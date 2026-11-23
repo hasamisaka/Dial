@@ -313,6 +313,9 @@
     <string name="high_performance_battery_needed">Dial\'ın pil kullanımını Sınırsız olarak ayarlayın. Ayarları açmak için buraya dokunun.</string>
     <string name="disable_haptics">Dokunsal geri bildirimi kapat</string>
     <string name="disable_haptics_subtitle">Dial\'daki tüm titreşimleri durdurur</string>
+    <string name="hide_ai_music">Yapay zekâ müziğini gizle</string>
+    <string name="hide_ai_music_subtitle" formatted="false">Bilinen yapay zekâ sanatçılarının şarkılarını arama, Ana Sayfa, mix ve radyodan kaldırır. Bu filtre yüzde 100 etkili değildir.</string>
+    <string name="hide_ai_music_sources">Listeler: Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist. Dial listeleri günde bir kez günceller.</string>
     <string name="static_background">Sabit arka plan renkleri</string>
     <string name="static_background_subtitle">Uygulama sayfalarının arkasındaki renklerin hareketini durdurur</string>
     <string name="enable">Etkinleştir</string>

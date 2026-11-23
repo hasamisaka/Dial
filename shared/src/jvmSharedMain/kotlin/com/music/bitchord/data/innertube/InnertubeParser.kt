@@ -419,6 +419,7 @@ object InnertubeParser {
                         ShelfItem(
                             song.title, song.artist, song.thumbnailUrl, song.videoId, null,
                             isVideo = song.isVideo, isPodcastEpisode = song.episode != null,
+                            artistIds = song.artistIds(),
                         )
                     }
                 // A chart row with nothing to play — "Top artists" lists the
@@ -440,7 +441,9 @@ object InnertubeParser {
         val title = shelf.o("title").runs()
         val items = shelf.a("contents").orEmpty().mapNotNull {
             parseResponsiveListItem(it.o("musicResponsiveListItemRenderer"))
-        }.map { ShelfItem(it.title, it.artist, it.thumbnailUrl, it.videoId, null, isVideo = it.isVideo) }
+        }.map {
+            ShelfItem(it.title, it.artist, it.thumbnailUrl, it.videoId, null, isVideo = it.isVideo, artistIds = it.artistIds())
+        }
         if (items.isEmpty()) return null
         val shelfTitle = title.ifBlank { "For you" }
         return HomeShelf(shelfTitle, items, layout = shelfLayoutFor(shelfTitle, items, fromList = true))
@@ -1914,8 +1917,18 @@ object InnertubeParser {
                     endpoint.findString("pageType") == NON_MUSIC_AUDIO_PAGE ||
                     subtitle.substringBefore(" • ").trim().equals("Episode", ignoreCase = true)
                 ),
+            artistIds = renderer.o("subtitle").a("runs").orEmpty().channelIds(),
         )
     }
+
+    /** The artist channels ("UC…") that a line of runs links to, in its order. */
+    private fun List<JsonElement>.channelIds(): List<String> = mapNotNull { run ->
+        run.o("navigationEndpoint").o("browseEndpoint").s("browseId")?.takeIf { it.startsWith("UC") }
+    }.distinct()
+
+    /** Every artist channel a parsed row credits, the lead's first. */
+    private fun Song.artistIds(): List<String> =
+        (listOfNotNull(artistId) + artists.mapNotNull { it.browseId }).filter { it.startsWith("UC") }.distinct()
 
     /**
      * The credit out of a shelf card's subtitle, which reads "Song • Chelsea

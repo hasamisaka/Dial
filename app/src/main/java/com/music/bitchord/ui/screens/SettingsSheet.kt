@@ -2041,6 +2041,10 @@ fun SettingsScreen(
         // No footer: it only restated the stop-on-close row's own subtitle,
         // which sits four rows above it and says the same thing in fewer words.
         if (shows(SettingsCategory.MISCELLANEOUS)) SearchableSettingsGroup(search, header = stringResource(R.string.miscellaneous)) {
+            val hideAiMusicTitle = stringResource(R.string.hide_ai_music)
+            row(hideAiMusicTitle, "ai", "artificial", "generated", "suno", "udio", "slop", "filter", "block", "hide") {
+                HideAiMusicRow(title = hideAiMusicTitle)
+            }
             val checkUpdatesTitle = stringResource(R.string.check_for_updates)
             row(checkUpdatesTitle, "update", "version", "release", "upgrade", "new version") {
                 val update by com.music.bitchord.data.AppUpdateChecker.available.collectAsStateWithLifecycle()

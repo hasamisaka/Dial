@@ -461,6 +461,9 @@
     <string name="high_performance_battery_needed">Set the battery usage of Dial to Unrestricted. Tap here to open the settings.</string>
     <string name="disable_haptics">Disable haptics</string>
     <string name="disable_haptics_subtitle">Stops all vibration feedback in Dial</string>
+    <string name="hide_ai_music">Hide AI music</string>
+    <string name="hide_ai_music_subtitle" formatted="false">Removes songs by known AI artists from search, Home, mixes and radio. This filter is not 100% effective.</string>
+    <string name="hide_ai_music_sources">Lists: Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist. Dial gets new lists one time each day.</string>
     <string name="static_background">Static background colours</string>
     <string name="static_background_subtitle">Stops the movement of the colours behind the app\'s pages</string>
     <string name="enable">Enable</string>

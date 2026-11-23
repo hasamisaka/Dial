@@ -274,6 +274,9 @@
     <string name="high_performance_battery_needed">הגדר את השימוש בסוללה של Dial ללא הגבלה. הקש כאן כדי לפתוח את ההגדרות.</string>
     <string name="disable_haptics">השבתת משוב רטט</string>
     <string name="disable_haptics_subtitle">מפסיק את כל משוב הרטט ב-Dial</string>
+    <string name="hide_ai_music">הסתרת מוזיקת AI</string>
+    <string name="hide_ai_music_subtitle" formatted="false">מסיר שירים של אמני AI ידועים מהחיפוש, מדף הבית, מהמיקסים ומהרדיו. המסנן הזה לא יעיל ב-100%.</string>
+    <string name="hide_ai_music_sources">רשימות: Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist. Dial מעדכן את הרשימות פעם ביום.</string>
     <string name="static_background">צבעי רקע סטטיים</string>
     <string name="static_background_subtitle">עוצר את תנועת הצבעים שמאחורי דפי האפליקציה</string>
     <string name="enable">הפעל</string>

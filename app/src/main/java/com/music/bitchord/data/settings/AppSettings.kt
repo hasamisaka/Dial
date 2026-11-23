@@ -542,6 +542,14 @@ object AppSettings {
      */
     val disableHaptics = MutableStateFlow(false)
 
+    /**
+     * "Hide AI music": songs and artists of listed AI music acts are left out
+     * of search, Home, the dials, mixes and radio. Off by default. Kept in step
+     * with [com.music.bitchord.data.aimusic.AiMusicFilter] by
+     * [com.music.bitchord.data.aimusic.HideAiMusic].
+     */
+    val hideAiMusic = MutableStateFlow(false)
+
     /** Preferred UI refresh rate while [highPerformanceMode] is enabled. */
     val performanceRefreshRate = MutableStateFlow(DEFAULT_PERFORMANCE_REFRESH_RATE)
 
@@ -1079,6 +1087,7 @@ object AppSettings {
             (context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager).isLowRamDevice
         }.getOrDefault(false)
         readAll()
+        com.music.bitchord.data.aimusic.HideAiMusic.init(context, hideAiMusic.value)
         watchConnection(context)
     }
 
@@ -1163,6 +1172,12 @@ object AppSettings {
         reduceAnimation.value = prefs.getBoolean(KEY_REDUCE_ANIMATION, false)
         highPerformanceMode.value = prefs.getBoolean(KEY_HIGH_PERFORMANCE_MODE, false)
         disableHaptics.value = prefs.getBoolean(KEY_DISABLE_HAPTICS, false)
+        val hideAi = prefs.getBoolean(KEY_HIDE_AI_MUSIC, false)
+        // An import that changes it: put the filter in step. At launch init does that.
+        if (hideAi != hideAiMusic.value) {
+            hideAiMusic.value = hideAi
+            com.music.bitchord.data.aimusic.HideAiMusic.apply(hideAi)
+        }
         com.music.bitchord.ui.haptics.HapticsGate.enabled = !disableHaptics.value
         performanceRefreshRate.value = normalizePerformanceRefreshRate(
             prefs.getInt(KEY_PERFORMANCE_REFRESH_RATE, DEFAULT_PERFORMANCE_REFRESH_RATE),
@@ -1716,6 +1731,12 @@ object AppSettings {
     fun setKeepHome(value: Boolean) {
         keepHome.value = value
         prefs.edit().putBoolean(KEY_KEEP_HOME, value).apply()
+    }
+
+    fun setHideAiMusic(value: Boolean) {
+        hideAiMusic.value = value
+        com.music.bitchord.data.aimusic.HideAiMusic.apply(value)
+        prefs.edit().putBoolean(KEY_HIDE_AI_MUSIC, value).apply()
     }
 
     fun setDisableHaptics(value: Boolean) {
@@ -2601,6 +2622,7 @@ object AppSettings {
     private const val KEY_REDUCE_ANIMATION = "reduce_animation"
     private const val KEY_HIGH_PERFORMANCE_MODE = "high_performance_mode"
     private const val KEY_DISABLE_HAPTICS = "disable_haptics"
+    private const val KEY_HIDE_AI_MUSIC = "hide_ai_music"
     private const val KEY_PERFORMANCE_REFRESH_RATE = "performance_refresh_rate"
     private const val KEY_PERFORMANCE_MODE = "performance_mode"
     private const val KEY_PERFORMANCE_MODE_SAVED = "performance_mode_saved"

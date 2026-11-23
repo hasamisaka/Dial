@@ -269,6 +269,9 @@
     <string name="high_performance_battery_needed">請將 Dial 的電量使用設定為“不受限制”。點選這裡開啟設定。</string>
     <string name="disable_haptics">停用觸覺回饋</string>
     <string name="disable_haptics_subtitle">停止 Dial 中的所有震動回饋</string>
+    <string name="hide_ai_music">隱藏 AI 音樂</string>
+    <string name="hide_ai_music_subtitle" formatted="false">從搜尋、首頁、合輯和電台中移除已知 AI 藝人的歌曲。此篩選器並非 100% 有效。</string>
+    <string name="hide_ai_music_sources">清單：Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist。Dial 每天更新一次清單。</string>
     <string name="static_background">靜態背景顏色</string>
     <string name="static_background_subtitle">停止應用程式頁面背後顏色的移動</string>
     <string name="enable">啟用</string>

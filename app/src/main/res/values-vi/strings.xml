@@ -323,6 +323,9 @@
     <string name="high_performance_battery_needed">Hãy đặt mức sử dụng pin của Dial thành Không hạn chế. Nhấn vào đây để mở cài đặt.</string>
     <string name="disable_haptics">Tắt phản hồi xúc giác</string>
     <string name="disable_haptics_subtitle">Dừng mọi phản hồi rung trong Dial</string>
+    <string name="hide_ai_music">Ẩn nhạc AI</string>
+    <string name="hide_ai_music_subtitle" formatted="false">Xóa bài hát của các nghệ sĩ AI đã biết khỏi tìm kiếm, Trang chủ, mix và radio. Bộ lọc này không hiệu quả 100%.</string>
+    <string name="hide_ai_music_sources">Danh sách: Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist. Dial cập nhật danh sách mỗi ngày một lần.</string>
     <string name="static_background">Màu nền tĩnh</string>
     <string name="static_background_subtitle">Dừng chuyển động của các màu phía sau các trang của ứng dụng</string>
     <string name="enable">Bật</string>
