@@ -439,17 +439,16 @@ object AppSettings {
     val directSourceStream = MutableStateFlow(false)
 
     /**
-     * The listener's word that their YouTube account has Premium, and that
-     * YouTube playback should take the signed-in route that reaches Premium's
-     * ~256kbps Opus (itag 774) instead of the anonymous 251 — the route
+     * The "High quality audio" switch: YouTube playback takes the signed-in route that reaches
+     * Premium's ~256kbps Opus (itag 774) instead of the anonymous 251 — the route
      * age-restricted tracks already take. See
      * [InnerTubeXResolver.extract][com.music.bitchord.data.innertube.InnerTubeXResolver.extract].
      *
-     * Off by default and asked rather than detected: nothing InnerTubeX
-     * exposes confirms the entitlement, and claiming it for an account
-     * without Premium only costs that account the faster anonymous route.
+     * On by default, and used only while the active profile is known to have Premium: see
+     * [com.music.bitchord.data.AccountPlanState.youtubePremiumAudio]. For a free account the
+     * settings show it off and greyed out.
      */
-    val youtubePremiumAudio = MutableStateFlow(false)
+    val youtubePremiumAudio = MutableStateFlow(true)
 
     /**
      * Widens stereo output via [com.music.bitchord.playback.SpatialAudioProcessor],
@@ -1152,7 +1151,7 @@ object AppSettings {
         loudnessOffOnSpeaker.value = prefs.getBoolean(KEY_LOUDNESS_OFF_ON_SPEAKER, true)
         dolbyAtmos.value = prefs.getBoolean(KEY_DOLBY_ATMOS, true)
         directSourceStream.value = prefs.getBoolean(KEY_DIRECT_SOURCE_STREAM, false)
-        youtubePremiumAudio.value = prefs.getBoolean(KEY_YOUTUBE_PREMIUM_AUDIO, false)
+        youtubePremiumAudio.value = prefs.getBoolean(KEY_YOUTUBE_PREMIUM_AUDIO, true)
         spatialAudio.value = prefs.getBoolean(KEY_SPATIAL_AUDIO, false)
         equalizerEnabled.value = prefs.getBoolean(KEY_EQ_ENABLED, false)
         equalizerMode.value = runCatching {
@@ -2602,7 +2601,7 @@ object AppSettings {
     private const val KEY_LOUDNESS_OFF_ON_SPEAKER = "loudness_off_on_speaker"
     private const val KEY_DOLBY_ATMOS = "dolby_atmos"
     private const val KEY_DIRECT_SOURCE_STREAM = "direct_source_stream"
-    private const val KEY_YOUTUBE_PREMIUM_AUDIO = "youtube_premium_audio"
+    private const val KEY_YOUTUBE_PREMIUM_AUDIO = "youtube_hq_audio"
     private const val KEY_SPATIAL_AUDIO = "spatial_audio"
     private const val KEY_EQ_ENABLED = "equalizer_enabled"
     private const val KEY_EQ_MODE = "equalizer_mode"

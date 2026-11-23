@@ -93,8 +93,8 @@
     <string name="testing">テスト中…</string>
     <string name="connected">接続済み</string>
     <string name="account_integrations">アカウントと連携</string>
-    <string name="youtube_premium_audio">YouTube Premium オーディオ</string>
-    <string name="youtube_premium_audio_subtitle">Premium に加入済み：標準の 160 kbps ではなく、高音質の約 256 kbps Opus で再生します</string>
+    <string name="youtube_premium_audio">高音質オーディオ</string>
+    <string name="youtube_premium_audio_subtitle">標準の160 kbpsではなく256 kbpsのOpus音声をストリーミング</string>
     <string name="account_scrobbling">アカウントとスクロブリング</string>
     <string name="rich_presence">リッチプレゼンス</string>
     <string name="scrobbling">スクロブリング</string>
@@ -1495,9 +1495,8 @@
     <string name="episode_filter_in_progress">再生中</string>
     <string name="episode_filter_played">再生済み</string>
     <string name="episode_filter_none">この条件のエピソードはありません。</string>
-    <string name="account_plan">プラン</string>
-    <string name="account_plan_checking">確認中…</string>
     <string name="account_plan_premium">Premium</string>
     <string name="account_plan_free">無料</string>
-    <string name="account_plan_unknown">不明。タップしてもう一度確認</string>
+    <string name="youtube_premium_audio_needs_premium">YouTube Music Premium専用</string>
+    <string name="youtube_music">YouTube Music</string>
 </resources>

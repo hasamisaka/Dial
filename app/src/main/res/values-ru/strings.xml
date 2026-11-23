@@ -108,8 +108,8 @@
     <string name="testing">Проверка…</string>
     <string name="connected">Подключено</string>
     <string name="account_integrations">Аккаунт и интеграции</string>
-    <string name="youtube_premium_audio">Звук YouTube Premium</string>
-    <string name="youtube_premium_audio_subtitle">У меня есть Premium: воспроизводить Opus повышенного качества ~256 кбит/с вместо стандартных 160 кбит/с</string>
+    <string name="youtube_premium_audio">Высокое качество звука</string>
+    <string name="youtube_premium_audio_subtitle">Воспроизводить звук Opus 256 кбит/с вместо обычных 160 кбит/с</string>
     <string name="account_scrobbling">Аккаунт и скробблинг</string>
     <string name="rich_presence">Rich Presence</string>
     <string name="scrobbling">Скробблинг</string>
@@ -1549,9 +1549,8 @@
     <string name="episode_filter_in_progress">Начаты</string>
     <string name="episode_filter_played">Прослушаны</string>
     <string name="episode_filter_none">Нет выпусков с этим фильтром.</string>
-    <string name="account_plan">Тариф</string>
-    <string name="account_plan_checking">Проверка…</string>
     <string name="account_plan_premium">Premium</string>
     <string name="account_plan_free">Бесплатный</string>
-    <string name="account_plan_unknown">Неизвестно. Нажмите, чтобы проверить снова</string>
+    <string name="youtube_premium_audio_needs_premium">Только с YouTube Music Premium</string>
+    <string name="youtube_music">YouTube Music</string>
 </resources>

@@ -99,8 +99,8 @@
     <string name="testing">Đang kiểm tra…</string>
     <string name="connected">Đã kết nối</string>
     <string name="account_integrations">Tài khoản &amp; tích hợp</string>
-    <string name="youtube_premium_audio">Âm thanh YouTube Premium</string>
-    <string name="youtube_premium_audio_subtitle">Tôi có Premium: phát Opus chất lượng cao hơn ~256 kbps thay vì 160 kbps tiêu chuẩn</string>
+    <string name="youtube_premium_audio">Âm thanh chất lượng cao</string>
+    <string name="youtube_premium_audio_subtitle">Phát âm thanh Opus 256 kbps thay vì 160 kbps tiêu chuẩn</string>
     <string name="account_scrobbling">Tài khoản &amp; scrobbling</string>
     <string name="rich_presence">Trạng thái hoạt động (Rich presence)</string>
     <string name="scrobbling">Scrobbling</string>
@@ -1431,9 +1431,8 @@
     <string name="episode_filter_in_progress">Đang nghe dở</string>
     <string name="episode_filter_played">Đã phát</string>
     <string name="episode_filter_none">Không có tập nào trong bộ lọc này.</string>
-    <string name="account_plan">Gói</string>
-    <string name="account_plan_checking">Đang kiểm tra…</string>
     <string name="account_plan_premium">Premium</string>
     <string name="account_plan_free">Miễn phí</string>
-    <string name="account_plan_unknown">Không rõ. Nhấn để kiểm tra lại</string>
+    <string name="youtube_premium_audio_needs_premium">Chỉ dành cho YouTube Music Premium</string>
+    <string name="youtube_music">YouTube Music</string>
 </resources>

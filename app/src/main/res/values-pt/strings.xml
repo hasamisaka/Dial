@@ -100,8 +100,8 @@
     <string name="testing">Testando…</string>
     <string name="connected">Conectado</string>
     <string name="account_integrations">Conta e integrações</string>
-    <string name="youtube_premium_audio">Áudio do YouTube Premium</string>
-    <string name="youtube_premium_audio_subtitle">Tenho Premium: transmitir o Opus de maior qualidade a ~256 kbps em vez dos 160 kbps padrão</string>
+    <string name="youtube_premium_audio">Áudio de alta qualidade</string>
+    <string name="youtube_premium_audio_subtitle">Reproduzir o áudio Opus a 256 kbps em vez dos 160 kbps padrão</string>
     <string name="account_scrobbling">Conta e scrobbling</string>
     <string name="rich_presence">Presença avançada</string>
     <string name="scrobbling">Scrobbling</string>
@@ -1522,9 +1522,8 @@
     <string name="episode_filter_in_progress">Em andamento</string>
     <string name="episode_filter_played">Reproduzidos</string>
     <string name="episode_filter_none">Nenhum episódio neste filtro.</string>
-    <string name="account_plan">Plano</string>
-    <string name="account_plan_checking">Verificando…</string>
     <string name="account_plan_premium">Premium</string>
     <string name="account_plan_free">Gratuito</string>
-    <string name="account_plan_unknown">Desconhecido. Toque para verificar de novo</string>
+    <string name="youtube_premium_audio_needs_premium">Só com YouTube Music Premium</string>
+    <string name="youtube_music">YouTube Music</string>
 </resources>

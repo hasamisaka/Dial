@@ -22,12 +22,10 @@ import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.LibraryMusic
 import androidx.compose.material.icons.rounded.SwitchAccount
 import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.material3.MaterialTheme
 import com.music.bitchord.ui.components.IosSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.music.bitchord.R
 import com.music.bitchord.data.AccountPlan
 import com.music.bitchord.data.AccountPlanState
+import com.music.bitchord.ui.components.PlanBadge
 import com.music.bitchord.data.model.Account
 import com.music.bitchord.data.settings.AppSettings
 import com.music.bitchord.ui.components.maskedUsername
@@ -83,14 +82,9 @@ fun AccountAndScrobblingScreen(
     val hideUserInfo by AppSettings.hideUserInfo.collectAsStateWithLifecycle()
     val youtubePremiumAudio by AppSettings.youtubePremiumAudio.collectAsStateWithLifecycle()
     var showPlayedPlaylist by remember { mutableStateOf(false) }
+    // Checked at app start and at sign-in (see AccountPlanState), not when this page opens.
     val youtubePlan by AccountPlanState.youtube.collectAsStateWithLifecycle()
     val spotifyPlan by AccountPlanState.spotify.collectAsStateWithLifecycle()
-    // Which account (and channel) the YouTube plan line is for: a new one is checked again.
-    val youtubePlanKey = "${account?.email}|${account?.name}|$channelName"
-    LaunchedEffect(signedIn, youtubePlanKey) {
-        if (signedIn) AccountPlanState.checkYoutube(youtubePlanKey)
-    }
-    LaunchedEffect(spotifyConnected) { AccountPlanState.checkSpotify(spotifyConnected) }
     if (showPlayedPlaylist) PlayedInDialDialog(onDismiss = { showPlayedPlaylist = false })
 
     Column(
@@ -109,6 +103,7 @@ fun AccountAndScrobblingScreen(
         // One card: who is signed in, which profile is listening, and the way
         // out, with the explanation of profiles underneath.
         SettingsGroup(
+            header = stringResource(R.string.youtube_music),
             footer = if (signedIn) stringResource(R.string.account_profiles_help) else null,
             topSpacing = 0.dp,
         ) {
@@ -118,6 +113,7 @@ fun AccountAndScrobblingScreen(
                 onSignIn = onSignIn,
                 onClick = onSwitchChannel,
                 grouped = true,
+                plan = youtubePlan,
             )
             if (signedIn) {
                 FullWidthDivider()
@@ -127,26 +123,29 @@ fun AccountAndScrobblingScreen(
                     subtitle = channelName ?: stringResource(R.string.default_youtube_profile),
                     onClick = onSwitchChannel,
                 )
-                // With the account because it is a claim about the account: only a
-                // signed-in Premium session is offered the higher Opus rung.
-                RowDivider()
-                SettingsRow(
-                    icon = Icons.Rounded.AutoAwesome,
-                    title = stringResource(R.string.youtube_premium_audio),
-                    subtitle = stringResource(R.string.youtube_premium_audio_subtitle),
-                    trailing = {
-                        IosSwitch(
-                            checked = youtubePremiumAudio,
-                            onCheckedChange = AppSettings::setYoutubePremiumAudio,
-                        )
-                    },
-                    onClick = { AppSettings.setYoutubePremiumAudio(!youtubePremiumAudio) },
-                )
-                FullWidthDivider()
-                AccountPlanRow(
-                    plan = youtubePlan,
-                    onClick = { AccountPlanState.checkYoutube(youtubePlanKey, force = true) },
-                )
+                // Only a signed-in Premium session is offered the higher Opus rung, so the
+                // switch is shown once the plan is known: usable for Premium, greyed out and
+                // off for a free account.
+                if (youtubePlan == AccountPlan.PREMIUM || youtubePlan == AccountPlan.FREE) {
+                    val premium = youtubePlan == AccountPlan.PREMIUM
+                    RowDivider()
+                    SettingsRow(
+                        icon = Icons.Rounded.AutoAwesome,
+                        title = stringResource(R.string.youtube_premium_audio),
+                        subtitle = stringResource(
+                            if (premium) R.string.youtube_premium_audio_subtitle else R.string.youtube_premium_audio_needs_premium,
+                        ),
+                        enabled = premium,
+                        trailing = {
+                            IosSwitch(
+                                checked = premium && youtubePremiumAudio,
+                                onCheckedChange = { if (premium) AppSettings.setYoutubePremiumAudio(it) },
+                                enabled = premium,
+                            )
+                        },
+                        onClick = { AppSettings.setYoutubePremiumAudio(!youtubePremiumAudio) },
+                    )
+                }
                 FullWidthDivider()
                 DestructiveRow(label = stringResource(R.string.sign_out), danger = true, onClick = onSignOut)
             }
@@ -163,13 +162,9 @@ fun AccountAndScrobblingScreen(
                     if (spotifyConnected.isNotBlank()) R.string.connected else R.string.tap_to_connect,
                 ),
                 onClick = onOpenSpotify,
+                titleBadge = { PlanBadge(spotifyPlan.takeIf { spotifyConnected.isNotBlank() }) },
             )
             if (spotifyConnected.isNotBlank()) {
-                RowDivider()
-                AccountPlanRow(
-                    plan = spotifyPlan,
-                    onClick = { AccountPlanState.checkSpotify(spotifyConnected, force = true) },
-                )
                 RowDivider()
                 SettingsRow(
                     icon = Icons.Rounded.GraphicEq,
@@ -416,25 +411,4 @@ fun AccountAndScrobblingScreen(
 @Composable
 private fun FullWidthDivider() {
     HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline)
-}
-
-/**
- * The plan line of an account: Premium, Free, or Unknown when the service did not say.
- * "Checking" while [plan] is null. A tap checks again.
- */
-@Composable
-private fun AccountPlanRow(plan: AccountPlan?, onClick: () -> Unit) {
-    SettingsRow(
-        icon = Icons.Rounded.WorkspacePremium,
-        title = stringResource(R.string.account_plan),
-        subtitle = stringResource(
-            when (plan) {
-                null -> R.string.account_plan_checking
-                AccountPlan.PREMIUM -> R.string.account_plan_premium
-                AccountPlan.FREE -> R.string.account_plan_free
-                AccountPlan.UNKNOWN -> R.string.account_plan_unknown
-            },
-        ),
-        onClick = onClick,
-    )
 }

@@ -96,8 +96,8 @@
     <string name="testing">กำลังทดสอบ…</string>
     <string name="connected">เชื่อมต่อแล้ว</string>
     <string name="account_integrations">บัญชีและการเชื่อมต่อ</string>
-    <string name="youtube_premium_audio">เสียง YouTube Premium</string>
-    <string name="youtube_premium_audio_subtitle">ฉันมี Premium: สตรีม Opus คุณภาพสูงกว่า ~256 kbps แทน 160 kbps มาตรฐาน</string>
+    <string name="youtube_premium_audio">เสียงคุณภาพสูง</string>
+    <string name="youtube_premium_audio_subtitle">สตรีมเสียง Opus 256 kbps แทน 160 kbps มาตรฐาน</string>
     <string name="account_scrobbling">บัญชีและการสโครบเบิล</string>
     <string name="rich_presence">Rich Presence</string>
     <string name="scrobbling">การสโครบเบิล</string>
@@ -1500,9 +1500,8 @@
     <string name="episode_filter_in_progress">กำลังเล่น</string>
     <string name="episode_filter_played">เล่นแล้ว</string>
     <string name="episode_filter_none">ไม่มีตอนในตัวกรองนี้</string>
-    <string name="account_plan">แพ็กเกจ</string>
-    <string name="account_plan_checking">กำลังตรวจสอบ…</string>
     <string name="account_plan_premium">Premium</string>
     <string name="account_plan_free">ฟรี</string>
-    <string name="account_plan_unknown">ไม่ทราบ แตะเพื่อตรวจสอบอีกครั้ง</string>
+    <string name="youtube_premium_audio_needs_premium">สำหรับ YouTube Music Premium เท่านั้น</string>
+    <string name="youtube_music">YouTube Music</string>
 </resources>

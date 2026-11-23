@@ -15,6 +15,7 @@ import com.music.bitchord.data.AppUpdateChecker
 import com.music.bitchord.data.LocalMediaRepository
 import com.music.bitchord.data.LikeState
 import com.music.bitchord.data.YtMusicRepository
+import com.music.bitchord.data.AccountPlanState
 import com.music.bitchord.data.TopPicks
 import com.music.bitchord.data.AppleArtistPhotos
 import com.music.bitchord.data.model.PODCAST_SHOW_PREFIX
@@ -102,6 +103,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flowOn
@@ -2075,6 +2077,14 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                     prepareLucky()
                 }
             }
+        }
+        // The plan badge and the high quality audio route follow the profile in use.
+        viewModelScope.launch {
+            combine(_activeAccountId, _activeProfileId, _signedIn) { accountId, profileId, signedIn ->
+                if (signedIn && accountId != null && profileId != null &&
+                    accountId != DeveloperOptions.PLACEHOLDER_ACCOUNT_ID
+                ) "$accountId:$profileId" else null
+            }.distinctUntilChanged().collect { AccountPlanState.setActiveYoutube(it) }
         }
         startSearchPipeline()
         startSuggestPipeline()
@@ -4879,6 +4889,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             if (wasSignedIn) clearListenerState()
             reloadForAccount()
             loadChannels(force = true)
+            // A sign-in is one of the two times the plan is checked; the app start is the other.
+            listenerKey()?.let { key ->
+                AccountPlanState.setActiveYoutube(key)
+                AccountPlanState.checkYoutube(key)
+            }
             onComplete(true)
         }
     }

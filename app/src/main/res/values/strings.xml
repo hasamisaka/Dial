@@ -132,8 +132,8 @@
     <string name="testing">Testing…</string>
     <string name="connected">Connected</string>
     <string name="account_integrations">Account &amp; integrations</string>
-    <string name="youtube_premium_audio">YouTube Premium audio</string>
-    <string name="youtube_premium_audio_subtitle">I have Premium: stream the higher-quality ~256 kbps Opus instead of the standard 160 kbps</string>
+    <string name="youtube_premium_audio">High quality audio</string>
+    <string name="youtube_premium_audio_subtitle">Stream the 256 kbps Opus audio instead of the standard 160 kbps</string>
     <string name="spotify">Spotify</string>
     <string name="spotify_connect_subtitle">Sign in to load your playlists. Playback uses YouTube Music.</string>
     <string name="spotify_sign_in">Sign in with Spotify</string>
@@ -1359,9 +1359,8 @@
     <string name="episode_filter_in_progress">In progress</string>
     <string name="episode_filter_played">Played</string>
     <string name="episode_filter_none">No episodes in this filter.</string>
-    <string name="account_plan">Plan</string>
-    <string name="account_plan_checking">Checking…</string>
     <string name="account_plan_premium">Premium</string>
     <string name="account_plan_free">Free</string>
-    <string name="account_plan_unknown">Unknown. Tap to check again</string>
+    <string name="youtube_premium_audio_needs_premium">Only for YouTube Music Premium</string>
+    <string name="youtube_music">YouTube Music</string>
 </resources>

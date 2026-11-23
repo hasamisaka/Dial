@@ -197,6 +197,8 @@ class BitChordApplication : Application(), SingletonImageLoader.Factory, Configu
         // one to hand — see SpotifyToken's doc for why.
         SpotifyToken.init(this)
         com.music.bitchord.data.spotify.SpotifyPlayedSync.init(this)
+        // After AppSettings: it follows the Spotify sign-in, and the plans it keeps show at once.
+        com.music.bitchord.data.AccountPlanState.init(this)
         // A sideloaded update is just a new APK over the old one, so app data —
         // including whatever the old build left in the image cache — survives
         // it untouched. Wipe that on the first launch of a higher versionCode so

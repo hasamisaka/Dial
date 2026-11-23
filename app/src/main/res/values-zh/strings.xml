@@ -93,8 +93,8 @@
     <string name="testing">测试中…</string>
     <string name="connected">已连接</string>
     <string name="account_integrations">账号与集成</string>
-    <string name="youtube_premium_audio">YouTube Premium 音频</string>
-    <string name="youtube_premium_audio_subtitle">我有 Premium：串流更高音质的约 256 kbps Opus，而不是标准的 160 kbps</string>
+    <string name="youtube_premium_audio">高音质</string>
+    <string name="youtube_premium_audio_subtitle">播放 256 kbps Opus 音频，而非标准的 160 kbps</string>
     <string name="account_scrobbling">账号与Scrobbling</string>
     <string name="rich_presence">Rich Presence</string>
     <string name="scrobbling">Scrobbling</string>
@@ -1494,9 +1494,8 @@
     <string name="episode_filter_in_progress">播放中</string>
     <string name="episode_filter_played">已播放</string>
     <string name="episode_filter_none">此筛选条件下没有单集。</string>
-    <string name="account_plan">方案</string>
-    <string name="account_plan_checking">正在检查…</string>
     <string name="account_plan_premium">Premium</string>
     <string name="account_plan_free">免费</string>
-    <string name="account_plan_unknown">未知。点按以重新检查</string>
+    <string name="youtube_premium_audio_needs_premium">仅限 YouTube Music Premium</string>
+    <string name="youtube_music">YouTube Music</string>
 </resources>

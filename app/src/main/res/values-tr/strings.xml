@@ -102,8 +102,8 @@
     <string name="testing">Test ediliyor…</string>
     <string name="connected">Bağlandı</string>
     <string name="account_integrations">Hesap ve entegrasyonlar</string>
-    <string name="youtube_premium_audio">YouTube Premium sesi</string>
-    <string name="youtube_premium_audio_subtitle">Premium\'um var: standart 160 kbps yerine daha yüksek kaliteli ~256 kbps Opus akışı</string>
+    <string name="youtube_premium_audio">Yüksek kaliteli ses</string>
+    <string name="youtube_premium_audio_subtitle">Standart 160 kbps yerine 256 kbps Opus sesi çal</string>
     <string name="account_scrobbling">Hesap ve scrobbling</string>
     <string name="rich_presence">Zengin varlık</string>
     <string name="scrobbling">Scrobbling</string>
@@ -1474,9 +1474,8 @@
     <string name="episode_filter_in_progress">Devam ediyor</string>
     <string name="episode_filter_played">Oynatıldı</string>
     <string name="episode_filter_none">Bu filtrede bölüm yok.</string>
-    <string name="account_plan">Plan</string>
-    <string name="account_plan_checking">Denetleniyor…</string>
     <string name="account_plan_premium">Premium</string>
     <string name="account_plan_free">Ücretsiz</string>
-    <string name="account_plan_unknown">Bilinmiyor. Yeniden denetlemek için dokun</string>
+    <string name="youtube_premium_audio_needs_premium">Yalnızca YouTube Music Premium ile</string>
+    <string name="youtube_music">YouTube Music</string>
 </resources>

@@ -100,8 +100,8 @@
     <string name="testing">בודק…</string>
     <string name="connected">מחובר</string>
     <string name="account_integrations">חשבון &amp; אינטגרציות</string>
-    <string name="youtube_premium_audio">אודיו של YouTube Premium</string>
-    <string name="youtube_premium_audio_subtitle">יש לי Premium: הזרמת Opus באיכות גבוהה יותר של ~256 kbps במקום 160 kbps הרגילים</string>
+    <string name="youtube_premium_audio">אודיו באיכות גבוהה</string>
+    <string name="youtube_premium_audio_subtitle">הזרמת אודיו Opus ב-256 kbps במקום 160 kbps הרגילים</string>
     <string name="account_scrobbling">חשבון &amp; סקרובלינג</string>
     <string name="rich_presence">נוכחות עשירה</string>
     <string name="scrobbling">סקרובלינג</string>
@@ -1522,9 +1522,8 @@
     <string name="episode_filter_in_progress">בהשמעה</string>
     <string name="episode_filter_played">הושמעו</string>
     <string name="episode_filter_none">אין פרקים במסנן הזה.</string>
-    <string name="account_plan">מינוי</string>
-    <string name="account_plan_checking">בודק…</string>
     <string name="account_plan_premium">Premium</string>
     <string name="account_plan_free">חינם</string>
-    <string name="account_plan_unknown">לא ידוע. הקש כדי לבדוק שוב</string>
+    <string name="youtube_premium_audio_needs_premium">רק עם YouTube Music Premium</string>
+    <string name="youtube_music">YouTube Music</string>
 </resources>

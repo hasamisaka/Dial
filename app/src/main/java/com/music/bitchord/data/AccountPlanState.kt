@@ -8,11 +8,16 @@ import com.music.bitchord.data.canvas.canvasGet
 import com.music.bitchord.data.canvas.canvasGetWithStatus
 import com.music.bitchord.data.spotify.SpotifyLikeSync
 import com.music.bitchord.data.spotify.SpotifyPlayedList
+import android.content.Context
+import android.content.SharedPreferences
+import com.music.bitchord.data.innertube.StreamResolver
+import com.music.bitchord.data.settings.AppSettings
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -21,57 +26,128 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 
 /**
- * The plan (Premium or free) of the signed-in YouTube and Spotify accounts, for the account
- * settings to show.
+ * The plan (Premium or free) of the signed-in YouTube and Spotify accounts.
  *
- * Each value is null while a check runs, then an [AccountPlan]. Checked when the settings ask,
- * once for each account in a process; a tap on the row checks again. Display only: no feature
- * reads these values, so a wrong or [AccountPlan.UNKNOWN] answer costs nothing but the line.
+ * The settings show it as a badge next to the account name, and the profile picker next to
+ * each profile. It also decides whether the "High quality audio" switch can be used (see
+ * [youtubePremiumAudio]); nothing else reads it.
+ *
+ * Checked only when the app starts and when an account signs in. A YouTube profile that was
+ * never checked is also checked when it becomes active. Each answer is kept on the
+ * device, so the badge shows at once on the next start, before the new check is done. An
+ * [AccountPlan.UNKNOWN] answer does not replace a known one: a failed request is not a change
+ * of plan.
  */
 object AccountPlanState {
 
     private const val TAG = "AccountPlan"
+    private const val PREFS = "account_plans"
+    private const val KEY_YOUTUBE = "youtube:"
+    private const val KEY_SPOTIFY = "spotify"
+
+    /** The start check waits this long, so it does not compete with the first screen's requests. */
+    private const val START_DELAY_MS = 6_000L
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    @Volatile private var prefs: SharedPreferences? = null
+
+    private val _youtubePlans = MutableStateFlow<Map<String, AccountPlan>>(emptyMap())
+
+    /** The last known plan of each YouTube profile, by "accountId:profileId". */
+    val youtubePlans: StateFlow<Map<String, AccountPlan>> = _youtubePlans
+
     private val _youtube = MutableStateFlow<AccountPlan?>(null)
+
+    /** The plan of the active YouTube profile; null when not known (yet) or signed out. */
     val youtube: StateFlow<AccountPlan?> = _youtube
 
     private val _spotify = MutableStateFlow<AccountPlan?>(null)
+
+    /** The plan of the connected Spotify account; null when not known (yet) or not connected. */
     val spotify: StateFlow<AccountPlan?> = _spotify
 
-    @Volatile private var youtubeKey: String? = null
+    @Volatile private var activeYoutube: String? = null
     @Volatile private var youtubeJob: Job? = null
-    @Volatile private var spotifyKey: Int? = null
+    @Volatile private var youtubeStartChecked = false
     @Volatile private var spotifyJob: Job? = null
 
     /**
-     * Checks the YouTube plan of the account [key] names (any text that changes with the
-     * account or channel), unless it was already checked. [force] checks again.
+     * Whether YouTube playback takes the route to Premium's ~256 kbps Opus: the listener's
+     * "High quality audio" switch, and only while the active profile is known to have Premium.
      */
-    @Synchronized
-    fun checkYoutube(key: String, force: Boolean = false) {
-        if (!force && key == youtubeKey && (_youtube.value != null || youtubeJob?.isActive == true)) return
-        youtubeKey = key
-        youtubeJob?.cancel()
-        _youtube.value = null
-        youtubeJob = scope.launch {
-            val plan = YtMusicRepository.youtubePlan()
-            Log.d(TAG, "YouTube plan: $plan")
-            if (youtubeKey == key) _youtube.value = plan
+    fun youtubePremiumAudio(): Boolean =
+        AppSettings.youtubePremiumAudio.value && _youtube.value == AccountPlan.PREMIUM
+
+    /** Reads the kept plans and starts to follow the Spotify sign-in. Call once, after [AppSettings]. */
+    fun init(context: Context) {
+        val store = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        prefs = store
+        _youtubePlans.value = store.all.mapNotNull { (key, value) ->
+            if (!key.startsWith(KEY_YOUTUBE)) return@mapNotNull null
+            val plan = (value as? String)?.let { name -> AccountPlan.entries.firstOrNull { it.name == name } }
+            plan?.let { key.removePrefix(KEY_YOUTUBE) to it }
+        }.toMap()
+        _spotify.value = store.getString(KEY_SPOTIFY, null)
+            ?.let { name -> AccountPlan.entries.firstOrNull { it.name == name } }
+        scope.launch {
+            var first = true
+            AppSettings.spotifySpdcToken.collect { cookie ->
+                val atStart = first
+                first = false
+                if (cookie.isBlank()) {
+                    spotifyJob?.cancel()
+                    setSpotify(null)
+                } else {
+                    // The first value is the app start; any later one is a new sign-in.
+                    checkSpotify(delayMs = if (atStart) START_DELAY_MS else 0L)
+                }
+            }
         }
     }
 
-    /** The same as [checkYoutube], for the Spotify sign-in [cookie]. */
+    /**
+     * The YouTube profile now in use, as "accountId:profileId", or null when signed out.
+     * Shows its kept plan at once. Checks it when this is the first profile since the app
+     * started, or when it was never checked.
+     */
     @Synchronized
-    fun checkSpotify(cookie: String, force: Boolean = false) {
-        if (cookie.isBlank()) return
-        val key = cookie.hashCode()
-        if (!force && key == spotifyKey && (_spotify.value != null || spotifyJob?.isActive == true)) return
-        spotifyKey = key
+    fun setActiveYoutube(key: String?) {
+        if (key == activeYoutube) return
+        activeYoutube = key
+        youtubeJob?.cancel()
+        _youtube.value = key?.let { _youtubePlans.value[it] }
+        if (key == null) return
+        val atStart = !youtubeStartChecked
+        if (atStart || _youtubePlans.value[key] == null) {
+            youtubeStartChecked = true
+            checkYoutube(key, delayMs = if (atStart) START_DELAY_MS else 0L)
+        }
+    }
+
+    /** Checks the plan of the YouTube profile [key] now: after a sign-in. */
+    @Synchronized
+    fun checkYoutube(key: String, delayMs: Long = 0L) {
+        youtubeJob?.cancel()
+        youtubeJob = scope.launch {
+            if (delayMs > 0) delay(delayMs)
+            val plan = YtMusicRepository.youtubePlan()
+            Log.d(TAG, "YouTube plan: $plan")
+            // A switch while the check ran: the answer was for another profile.
+            if (activeYoutube != key || plan == AccountPlan.UNKNOWN) return@launch
+            _youtubePlans.value = _youtubePlans.value + (key to plan)
+            val changed = _youtube.value != plan
+            _youtube.value = plan
+            // Stream URLs picked under the old answer took the other route; the next play asks again.
+            if (changed) StreamResolver.forgetResolved()
+            prefs?.edit()?.putString(KEY_YOUTUBE + key, plan.name)?.apply()
+        }
+    }
+
+    private fun checkSpotify(delayMs: Long) {
         spotifyJob?.cancel()
-        _spotify.value = null
         spotifyJob = scope.launch {
+            if (delayMs > 0) delay(delayMs)
             val plan = runCatching { spotifyPlan() }
                 .onFailure {
                     if (it is CancellationException) throw it
@@ -79,8 +155,15 @@ object AccountPlanState {
                 }
                 .getOrDefault(AccountPlan.UNKNOWN)
             Log.d(TAG, "Spotify plan: $plan")
-            if (spotifyKey == key) _spotify.value = plan
+            if (plan != AccountPlan.UNKNOWN) setSpotify(plan)
         }
+    }
+
+    private fun setSpotify(plan: AccountPlan?) {
+        _spotify.value = plan
+        val editor = prefs?.edit() ?: return
+        if (plan == null) editor.remove(KEY_SPOTIFY) else editor.putString(KEY_SPOTIFY, plan.name)
+        editor.apply()
     }
 
     // ---- Spotify ----------------------------------------------------------

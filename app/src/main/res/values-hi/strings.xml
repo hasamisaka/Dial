@@ -98,8 +98,8 @@
     <string name="testing">जांच हो रही है…</string>
     <string name="connected">कनेक्टेड</string>
     <string name="account_integrations">खाता और एकीकरण</string>
-    <string name="youtube_premium_audio">YouTube Premium ऑडियो</string>
-    <string name="youtube_premium_audio_subtitle">मेरे पास Premium है: सामान्य 160 kbps के बजाय उच्च गुणवत्ता वाला ~256 kbps Opus स्ट्रीम करें</string>
+    <string name="youtube_premium_audio">उच्च गुणवत्ता वाला ऑडियो</string>
+    <string name="youtube_premium_audio_subtitle">सामान्य 160 kbps के बजाय 256 kbps Opus ऑडियो स्ट्रीम करें</string>
     <string name="account_scrobbling">खाता और स्क्रॉबलिंग</string>
     <string name="rich_presence">रिच प्रेज़ेंस</string>
     <string name="scrobbling">स्क्रॉबलिंग</string>
@@ -1517,9 +1517,8 @@
     <string name="episode_filter_in_progress">जारी</string>
     <string name="episode_filter_played">चलाए गए</string>
     <string name="episode_filter_none">इस फ़िल्टर में कोई एपिसोड नहीं।</string>
-    <string name="account_plan">प्लान</string>
-    <string name="account_plan_checking">जाँच हो रही है…</string>
     <string name="account_plan_premium">Premium</string>
     <string name="account_plan_free">मुफ़्त</string>
-    <string name="account_plan_unknown">अज्ञात। फिर से जाँचने के लिए टैप करें</string>
+    <string name="youtube_premium_audio_needs_premium">केवल YouTube Music Premium के साथ</string>
+    <string name="youtube_music">YouTube Music</string>
 </resources>
