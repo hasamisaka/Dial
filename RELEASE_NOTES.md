@@ -6,12 +6,12 @@ Dial 1.8.6
 - Stats for nerds: the codec line does not flash when the song changes. The old line stays until the new line is ready.
 
 ### Accounts
-- Settings, Account: a badge after the account name shows the plan of the account. A gold "Premium" badge shows for a Premium account. A grey "Free" badge shows for a free account. No badge shows when Dial cannot find the plan. The YouTube Music account, the Spotify account and each profile in the profile list show the badge.
+- Settings, Account & integrations: a badge after the account name shows the plan of the account. A gold "Premium" badge shows for a Premium account. A grey "Free" badge shows for a free account. No badge shows when Dial cannot find the plan. The YouTube Music account, the Spotify account and each profile in the profile list show the badge.
 - Dial finds the plan when the app starts and when you sign in. Dial keeps the result on the device.
-- The first section of Account and integrations has the new name "YouTube Music".
+- The first section of Account & integrations has the new name "YouTube Music".
 
 ### High quality audio
-- New setting: Settings, Account, YouTube Music, High quality audio. With a YouTube Music Premium account, Dial plays the 256 kbps Opus audio. Before this change, Dial played 160 kbps.
+- New setting: Settings, Account & integrations, YouTube Music, High quality audio. With a YouTube Music Premium account, Dial plays the 256 kbps Opus audio. Before this change, Dial played 160 kbps.
 - This setting is on by default for a Premium account. For a free account, the setting is off and you cannot change it.
 
 ### Hide AI music
