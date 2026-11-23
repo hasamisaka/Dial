@@ -45,6 +45,8 @@ import coil3.compose.AsyncImage
 import com.music.bitchord.R
 import com.music.bitchord.auth.GoogleAccountSession
 import com.music.bitchord.auth.YouTubeProfile
+import com.music.bitchord.data.AccountPlan
+import com.music.bitchord.data.AccountPlanState
 import com.music.bitchord.data.settings.AppSettings
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chrisbanes.haze.HazeState
@@ -71,6 +73,7 @@ fun AccountProfileSelector(
     modifier: Modifier = Modifier,
 ) {
     var managing by remember(visible) { mutableStateOf(false) }
+    val plans by AccountPlanState.youtubePlans.collectAsStateWithLifecycle()
     val shape = MaterialTheme.shapes.extraLarge
     // Across the page, out of the bar's pill the photo sits in.
     PopupLayer(
@@ -96,7 +99,8 @@ fun AccountProfileSelector(
                 items(account.profiles.size) { index ->
                     val profile = account.profiles[index]
                     ProfileRow(profile, account.accountId == activeAccountId && profile.profileId == activeProfileId,
-                        managing, { onSelect(account, profile); onDismiss() }, { onRemoveAccount(account) })
+                        managing, { onSelect(account, profile); onDismiss() }, { onRemoveAccount(account) },
+                        plan = plans["${account.accountId}:${profile.profileId}"])
                 }
                 }
                 item { SelectorAction(Icons.Rounded.Add, stringResource(R.string.add_account), onAddAccount) }
@@ -109,7 +113,7 @@ fun AccountProfileSelector(
 }
 
 @Composable private fun ProfileRow(profile: YouTubeProfile, selected: Boolean, managing: Boolean,
-    onClick: () -> Unit, onRemove: () -> Unit) {
+    onClick: () -> Unit, onRemove: () -> Unit, plan: AccountPlan? = null) {
     val description = stringResource(if (selected) R.string.selected_account else R.string.switch_account)
     Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.RadioButton, onClick = if (managing) onRemove else onClick)
         .semantics { contentDescription = description }
@@ -117,7 +121,10 @@ fun AccountProfileSelector(
         if (profile.avatar != null) AsyncImage(profile.avatar, null, Modifier.size(38.dp).clip(MaterialTheme.shapes.extraLarge), contentScale = com.music.bitchord.ui.components.thumbnailContentScale())
         else Icon(Icons.Rounded.Person, null, Modifier.size(38.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.width(12.dp)); Column(Modifier.weight(1f)) {
-            Text(profile.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(profile.name, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                PlanBadge(plan, Modifier.padding(start = 8.dp))
+            }
             Text(profile.handle.ifBlank { stringResource(if (profile.isBrandAccount) R.string.brand_account else R.string.personal) },
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }

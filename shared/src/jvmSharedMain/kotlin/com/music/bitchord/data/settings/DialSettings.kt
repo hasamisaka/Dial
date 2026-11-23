@@ -70,6 +70,9 @@ object DialSettings {
     /** Where the speed dial's unpinned tiles come from; see [SpeedDialSource]. */
     val speedDialSource = MutableStateFlow(SpeedDialSource.YOUTUBE)
 
+    /** What the Spotify speed dial's picks start from; see [SpotifyDialSeeds]. */
+    val spotifyDialSeeds = MutableStateFlow(SpotifyDialSeeds.PLAYS)
+
     /** How many rows of three tiles the speed dial shows per page: 3 or 4. */
     val speedDialRows = MutableStateFlow(DEFAULT_SPEED_DIAL_ROWS)
 
@@ -89,6 +92,8 @@ object DialSettings {
         mixesDial.value = p.getBoolean(KEY_MIXES_DIAL, true)
         speedDialSource.value = SpeedDialSource.entries
             .firstOrNull { it.name == p.getString(KEY_SPEED_DIAL_SOURCE) } ?: SpeedDialSource.YOUTUBE
+        spotifyDialSeeds.value = SpotifyDialSeeds.entries
+            .firstOrNull { it.name == p.getString(KEY_SPOTIFY_DIAL_SEEDS) } ?: SpotifyDialSeeds.PLAYS
         speedDialRows.value = p.getInt(KEY_SPEED_DIAL_ROWS, DEFAULT_SPEED_DIAL_ROWS).takeIf { it in 3..4 }
             ?: DEFAULT_SPEED_DIAL_ROWS
         speedDialPins.value = DialPins.decode(p.getString(KEY_SPEED_DIAL_PINS))
@@ -116,6 +121,7 @@ object DialSettings {
         artistDial = artistDial.value,
         feelingLucky = feelingLucky.value,
         speedDialSource = speedDialSource.value,
+        spotifyDialSeeds = spotifyDialSeeds.value,
         speedDialRows = speedDialRows.value,
         dialTileStyle = dialTileStyle.value,
         dialLabels = dialLabels.value,
@@ -341,6 +347,11 @@ object DialSettings {
         store.edit { putString(KEY_SPEED_DIAL_SOURCE, value.name) }
     }
 
+    fun setSpotifyDialSeeds(value: SpotifyDialSeeds) {
+        spotifyDialSeeds.value = value
+        store.edit { putString(KEY_SPOTIFY_DIAL_SEEDS, value.name) }
+    }
+
     fun setSpeedDialRows(value: Int) {
         val rows = value.coerceIn(3, 4)
         speedDialRows.value = rows
@@ -363,4 +374,5 @@ object DialSettings {
     private const val KEY_DIAL_TILE_STYLE = "custom_dial_tile_style"
     private const val KEY_SPEED_DIAL_ROWS = "custom_speed_dial_rows"
     private const val KEY_SPEED_DIAL_SOURCE = "custom_speed_dial_source"
+    private const val KEY_SPOTIFY_DIAL_SEEDS = "custom_spotify_dial_seeds"
 }

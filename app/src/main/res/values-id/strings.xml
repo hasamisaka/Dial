@@ -93,6 +93,8 @@
     <string name="testing">Menguji…</string>
     <string name="connected">Terhubung</string>
     <string name="account_integrations">Akun &amp; integrasi</string>
+    <string name="youtube_premium_audio">Audio kualitas tinggi</string>
+    <string name="youtube_premium_audio_subtitle">Putar audio Opus 256 kbps, bukan 160 kbps standar</string>
     <string name="account_scrobbling">Akun &amp; scrobbling</string>
     <string name="rich_presence">Rich presence</string>
     <string name="scrobbling">Scrobbling</string>
@@ -268,6 +270,9 @@
     <string name="high_performance_battery_needed">Atur penggunaan baterai Dial ke Tidak Dibatasi. Ketuk di sini untuk membuka pengaturan.</string>
     <string name="disable_haptics">Nonaktifkan haptik</string>
     <string name="disable_haptics_subtitle">Menghentikan semua umpan balik getaran di Dial</string>
+    <string name="hide_ai_music">Sembunyikan musik AI</string>
+    <string name="hide_ai_music_subtitle" formatted="false">Menghapus lagu dari artis AI yang dikenal dari pencarian, Beranda, mix, dan radio. Filter ini tidak 100% efektif.</string>
+    <string name="hide_ai_music_sources">Daftar: Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist. Dial memperbarui daftar sekali sehari.</string>
     <string name="static_background">Warna latar belakang statis</string>
     <string name="static_background_subtitle">Menghentikan gerakan warna di belakang halaman aplikasi</string>
     <string name="enable">Aktifkan</string>
@@ -1492,4 +1497,10 @@
     <string name="episode_filter_in_progress">Sedang diputar</string>
     <string name="episode_filter_played">Sudah diputar</string>
     <string name="episode_filter_none">Tidak ada episode di filter ini.</string>
+    <string name="spotify_dial_seeds">Saran Spotify dari</string>
+    <string name="spotify_dial_seeds_plays">Putaran di Dial</string>
+    <string name="spotify_dial_seeds_top">Top Spotify</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">Gratis</string>
+    <string name="youtube_premium_audio_needs_premium">Hanya untuk YouTube Music Premium</string>
 </resources>

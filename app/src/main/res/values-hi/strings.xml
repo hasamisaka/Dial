@@ -98,6 +98,8 @@
     <string name="testing">जांच हो रही है…</string>
     <string name="connected">कनेक्टेड</string>
     <string name="account_integrations">खाता और एकीकरण</string>
+    <string name="youtube_premium_audio">उच्च गुणवत्ता वाला ऑडियो</string>
+    <string name="youtube_premium_audio_subtitle">सामान्य 160 kbps के बजाय 256 kbps Opus ऑडियो स्ट्रीम करें</string>
     <string name="account_scrobbling">खाता और स्क्रॉबलिंग</string>
     <string name="rich_presence">रिच प्रेज़ेंस</string>
     <string name="scrobbling">स्क्रॉबलिंग</string>
@@ -273,6 +275,9 @@
     <string name="high_performance_battery_needed">Dial की बैटरी उपयोग सेटिंग को “अप्रतिबंधित” पर सेट करें। सेटिंग खोलने के लिए यहां टैप करें।</string>
     <string name="disable_haptics">हैप्टिक्स बंद करें</string>
     <string name="disable_haptics_subtitle">Dial में सभी वाइब्रेशन फ़ीडबैक बंद करता है</string>
+    <string name="hide_ai_music">AI संगीत छिपाएँ</string>
+    <string name="hide_ai_music_subtitle" formatted="false">जाने-माने AI कलाकारों के गाने खोज, होम, मिक्स और रेडियो से हटाता है। यह फ़िल्टर 100% प्रभावी नहीं है।</string>
+    <string name="hide_ai_music_sources">सूचियाँ: Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist. Dial दिन में एक बार सूचियाँ अपडेट करता है।</string>
     <string name="static_background">स्थिर बैकग्राउंड रंग</string>
     <string name="static_background_subtitle">ऐप के पेजों के पीछे के रंगों की हलचल रोकता है</string>
     <string name="enable">चालू करें</string>
@@ -1515,4 +1520,10 @@
     <string name="episode_filter_in_progress">जारी</string>
     <string name="episode_filter_played">चलाए गए</string>
     <string name="episode_filter_none">इस फ़िल्टर में कोई एपिसोड नहीं।</string>
+    <string name="spotify_dial_seeds">Spotify सुझाव इनसे</string>
+    <string name="spotify_dial_seeds_plays">Dial में चलाए गए</string>
+    <string name="spotify_dial_seeds_top">Spotify टॉप</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">मुफ़्त</string>
+    <string name="youtube_premium_audio_needs_premium">केवल YouTube Music Premium के साथ</string>
 </resources>

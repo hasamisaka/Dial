@@ -62,6 +62,21 @@ object StreamResolver {
     @Volatile
     var maxKbps: () -> Int = { Int.MAX_VALUE }
 
+    /**
+     * Whether the listener says their account has YouTube Premium and wants
+     * its higher Opus rung — see [InnerTubeXResolver.extract]'s `premium`.
+     */
+    @Volatile
+    var premiumAudio: () -> Boolean = { false }
+
+    /**
+     * Drops the remembered stream URLs, so the next play of a track resolves
+     * afresh — for a setting that changes which stream a resolve picks.
+     */
+    fun forgetResolved() {
+        recent.clear()
+    }
+
 
     private const val TAG = "BitChord"
 
@@ -264,7 +279,12 @@ object StreamResolver {
 
         recent[videoId]
             ?.takeIf { MonotonicClock.nowMs() - it.at < URL_TTL_MS }
-            ?.let { return it.url }
+            ?.let {
+                // Stats for nerds may have been cleared since (a new player
+                // service), while this process still holds the URL.
+                NerdStats.onStreamPicked(videoId, it.kbps)
+                return it.url
+            }
 
         // A verdict, not a failure: asking again cannot change the answer, so
         // every caller after the first is told so without a request being sent.
@@ -277,7 +297,7 @@ object StreamResolver {
         // real figure is ever known.
         NerdStats.onStreamPicked(videoId, stream.kbps)
         stream.loudnessDb?.let { loudness[videoId] = it }
-        remember(videoId, stream.url)
+        remember(videoId, stream.url, stream.kbps)
         return stream.url
     }
 
@@ -516,7 +536,7 @@ object StreamResolver {
         val skip = mutableSetOf<String>()
         repeat(INNERTUBEX_ATTEMPTS) { attempt ->
             val found = try {
-                InnerTubeXResolver.extract(videoId, maxKbps, skip, requireM4a, uploaded)
+                InnerTubeXResolver.extract(videoId, maxKbps, skip, requireM4a, uploaded, premiumAudio())
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -565,7 +585,7 @@ object StreamResolver {
     private suspend fun askAsUpload(videoId: String, maxKbps: Int, requireM4a: Boolean): Stream? {
         TrackLog.d(TAG, "first stream for $videoId was refused; asking as an upload")
         val found = try {
-            InnerTubeXResolver.extract(videoId, maxKbps, emptySet(), requireM4a, uploaded = true)
+            InnerTubeXResolver.extract(videoId, maxKbps, emptySet(), requireM4a, uploaded = true, premium = premiumAudio())
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -1286,7 +1306,7 @@ object StreamResolver {
     suspend fun contentLength(videoId: String): Long? =
         resolve(videoId).toHttpUrlOrNull()?.queryParameter("clen")?.toLongOrNull()
 
-    private class Resolved(val url: String, val at: Long)
+    private class Resolved(val url: String, val at: Long, val kbps: Int = 0)
 
     /**
      * Stream URLs already resolved, by videoId — and, since [resolve] only ever
@@ -1306,12 +1326,12 @@ object StreamResolver {
     /** Enough for the queue in hand; this is a latency cache, not a store. */
     private const val MAX_REMEMBERED = 32
 
-    private fun remember(videoId: String, url: String) {
+    private fun remember(videoId: String, url: String, kbps: Int = 0) {
         if (recent.size >= MAX_REMEMBERED) {
             val cutoff = MonotonicClock.nowMs() - URL_TTL_MS
             recent.entries.removeAll { it.value.at < cutoff }
             if (recent.size >= MAX_REMEMBERED) recent.clear()
         }
-        recent[videoId] = Resolved(url, MonotonicClock.nowMs())
+        recent[videoId] = Resolved(url, MonotonicClock.nowMs(), kbps)
     }
 }

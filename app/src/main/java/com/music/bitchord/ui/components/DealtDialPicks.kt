@@ -1,6 +1,7 @@
 package com.music.bitchord.ui.components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -17,6 +18,10 @@ import com.music.bitchord.data.spotify.SpotifyRecommendations
  * while there is nothing dealt: for History, which is built as it goes, and
  * until the round's feed is [ready].
  *
+ * Spotify's picks start from the songs played here or from the account's
+ * top songs and artists on Spotify, as [CustomizationSettings.spotifyDialSeeds]
+ * says; a change of that deals them again.
+ *
  * Spotify's picks take a few requests to arrive. Until they have, this stays
  * null, so Home keeps the dial it showed last rather than showing YouTube's
  * tiles and then swapping them. They go ahead of YouTube's dial, which fills
@@ -32,9 +37,10 @@ fun rememberDealtDialPicks(
     val dealt = remember(round, source, ready) {
         if (source == SpeedDialSource.HISTORY || !ready) null else CustomizationSettings.pickSpeedDial(source, shelves())
     }
-    val spotify by produceState<List<ShelfItem>?>(null, round, source, ready) {
+    val seeds by CustomizationSettings.spotifyDialSeeds.collectAsState()
+    val spotify by produceState<List<ShelfItem>?>(null, round, source, ready, seeds) {
         value = null
-        if (source == SpeedDialSource.SPOTIFY && ready) value = SpotifyRecommendations.dialPicks()
+        if (source == SpeedDialSource.SPOTIFY && ready) value = SpotifyRecommendations.dialPicks(seeds, round)
     }
     if (source != SpeedDialSource.SPOTIFY) return dealt
     val tiles = spotify ?: return null

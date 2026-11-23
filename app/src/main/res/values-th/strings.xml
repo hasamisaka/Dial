@@ -96,6 +96,8 @@
     <string name="testing">กำลังทดสอบ…</string>
     <string name="connected">เชื่อมต่อแล้ว</string>
     <string name="account_integrations">บัญชีและการเชื่อมต่อ</string>
+    <string name="youtube_premium_audio">เสียงคุณภาพสูง</string>
+    <string name="youtube_premium_audio_subtitle">สตรีมเสียง Opus 256 kbps แทน 160 kbps มาตรฐาน</string>
     <string name="account_scrobbling">บัญชีและการสโครบเบิล</string>
     <string name="rich_presence">Rich Presence</string>
     <string name="scrobbling">การสโครบเบิล</string>
@@ -307,6 +309,9 @@
     <string name="high_performance_battery_needed">ตั้งค่าการใช้แบตเตอรี่ของ Dial เป็นไม่จำกัด แตะที่นี่เพื่อเปิดการตั้งค่า</string>
     <string name="disable_haptics">ปิดการสั่นตอบสนอง</string>
     <string name="disable_haptics_subtitle">หยุดการสั่นตอบสนองทั้งหมดใน Dial</string>
+    <string name="hide_ai_music">ซ่อนเพลง AI</string>
+    <string name="hide_ai_music_subtitle" formatted="false">นำเพลงของศิลปิน AI ที่รู้จักออกจากการค้นหา หน้าแรก มิกซ์ และวิทยุ ตัวกรองนี้ไม่ได้มีประสิทธิภาพ 100%</string>
+    <string name="hide_ai_music_sources">รายการ: Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist Dial อัปเดตรายการวันละครั้ง</string>
     <string name="static_background">สีพื้นหลังแบบนิ่ง</string>
     <string name="static_background_subtitle">หยุดการเคลื่อนไหวของสีด้านหลังหน้าต่าง ๆ ของแอป</string>
     <string name="enable">เปิดใช้งาน</string>
@@ -1498,4 +1503,10 @@
     <string name="episode_filter_in_progress">กำลังเล่น</string>
     <string name="episode_filter_played">เล่นแล้ว</string>
     <string name="episode_filter_none">ไม่มีตอนในตัวกรองนี้</string>
+    <string name="spotify_dial_seeds">คำแนะนำของ Spotify จาก</string>
+    <string name="spotify_dial_seeds_plays">การเล่นใน Dial</string>
+    <string name="spotify_dial_seeds_top">ท็อปของ Spotify</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">ฟรี</string>
+    <string name="youtube_premium_audio_needs_premium">สำหรับ YouTube Music Premium เท่านั้น</string>
 </resources>

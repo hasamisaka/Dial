@@ -1,6 +1,5 @@
 package com.music.bitchord.data.spotify
 
-import com.music.bitchord.data.canvas.SpotifyCanvasQuery
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -61,21 +60,5 @@ class SpotifyLikeMirrorTest {
         val stale = SpotifyLikeMirror.parseMutation("""{"errors":[{"message":"PersistedQueryNotFound"}]}""")
         assertIs<SpotifyLikeMirror.MutationAnswer.Failed>(stale)
         assertTrue(stale.staleHash)
-    }
-
-    @Test
-    fun mutationHashesAreReadOffThePlayerToo() {
-        val hash = "a".repeat(64)
-        val script = """x=new o.l("addToLibrary","mutation","$hash",null)"""
-        assertEquals(hash, SpotifyCanvasQuery.findQueryHash(script, "addToLibrary"))
-        val hashes = SpotifyCanvasQuery.QueryHashes(
-            fetch = { url ->
-                if (url == "https://open.spotify.com/") "https://open.spotifycdn.com/cdn/build/web-player/web-player.1.js"
-                else script
-            },
-            operation = "addToLibrary",
-            fallback = SpotifyLikeMirror.KNOWN_ADD_HASH,
-        )
-        assertEquals(hash, hashes.hash())
     }
 }

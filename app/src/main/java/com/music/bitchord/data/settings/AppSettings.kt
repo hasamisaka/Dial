@@ -439,6 +439,18 @@ object AppSettings {
     val directSourceStream = MutableStateFlow(false)
 
     /**
+     * The "High quality audio" switch: YouTube playback takes the signed-in route that reaches
+     * Premium's ~256kbps Opus (itag 774) instead of the anonymous 251 — the route
+     * age-restricted tracks already take. See
+     * [InnerTubeXResolver.extract][com.music.bitchord.data.innertube.InnerTubeXResolver.extract].
+     *
+     * On by default, and used only while the active profile is known to have Premium: see
+     * [com.music.bitchord.data.AccountPlanState.youtubePremiumAudio]. For a free account the
+     * settings show it off and greyed out.
+     */
+    val youtubePremiumAudio = MutableStateFlow(true)
+
+    /**
      * Widens stereo output via [com.music.bitchord.playback.SpatialAudioProcessor],
      * a stereo widening + cross-feed effect running inside ExoPlayer's own
      * pipeline. Not true object-based spatial audio — YouTube only ever hands
@@ -541,6 +553,14 @@ object AppSettings {
      * [com.music.bitchord.ui.haptics.HapticsGate], which this keeps in step.
      */
     val disableHaptics = MutableStateFlow(false)
+
+    /**
+     * "Hide AI music": songs and artists of listed AI music acts are left out
+     * of search, Home, the dials, mixes and radio. Off by default. Kept in step
+     * with [com.music.bitchord.data.aimusic.AiMusicFilter] by
+     * [com.music.bitchord.data.aimusic.HideAiMusic].
+     */
+    val hideAiMusic = MutableStateFlow(false)
 
     /** Preferred UI refresh rate while [highPerformanceMode] is enabled. */
     val performanceRefreshRate = MutableStateFlow(DEFAULT_PERFORMANCE_REFRESH_RATE)
@@ -1079,6 +1099,7 @@ object AppSettings {
             (context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager).isLowRamDevice
         }.getOrDefault(false)
         readAll()
+        com.music.bitchord.data.aimusic.HideAiMusic.init(context, hideAiMusic.value)
         watchConnection(context)
     }
 
@@ -1139,6 +1160,7 @@ object AppSettings {
         loudnessOffOnSpeaker.value = prefs.getBoolean(KEY_LOUDNESS_OFF_ON_SPEAKER, true)
         dolbyAtmos.value = prefs.getBoolean(KEY_DOLBY_ATMOS, true)
         directSourceStream.value = prefs.getBoolean(KEY_DIRECT_SOURCE_STREAM, false)
+        youtubePremiumAudio.value = prefs.getBoolean(KEY_YOUTUBE_PREMIUM_AUDIO, true)
         spatialAudio.value = prefs.getBoolean(KEY_SPATIAL_AUDIO, false)
         equalizerEnabled.value = prefs.getBoolean(KEY_EQ_ENABLED, false)
         equalizerMode.value = runCatching {
@@ -1163,6 +1185,12 @@ object AppSettings {
         reduceAnimation.value = prefs.getBoolean(KEY_REDUCE_ANIMATION, false)
         highPerformanceMode.value = prefs.getBoolean(KEY_HIGH_PERFORMANCE_MODE, false)
         disableHaptics.value = prefs.getBoolean(KEY_DISABLE_HAPTICS, false)
+        val hideAi = prefs.getBoolean(KEY_HIDE_AI_MUSIC, false)
+        // An import that changes it: put the filter in step. At launch init does that.
+        if (hideAi != hideAiMusic.value) {
+            hideAiMusic.value = hideAi
+            com.music.bitchord.data.aimusic.HideAiMusic.apply(hideAi)
+        }
         com.music.bitchord.ui.haptics.HapticsGate.enabled = !disableHaptics.value
         performanceRefreshRate.value = normalizePerformanceRefreshRate(
             prefs.getInt(KEY_PERFORMANCE_REFRESH_RATE, DEFAULT_PERFORMANCE_REFRESH_RATE),
@@ -1513,6 +1541,13 @@ object AppSettings {
         prefs.edit().putBoolean(KEY_DIRECT_SOURCE_STREAM, value).apply()
     }
 
+    fun setYoutubePremiumAudio(value: Boolean) {
+        youtubePremiumAudio.value = value
+        prefs.edit().putBoolean(KEY_YOUTUBE_PREMIUM_AUDIO, value).apply()
+        // Remembered URLs were picked under the old route; the next play asks again.
+        com.music.bitchord.data.innertube.StreamResolver.forgetResolved()
+    }
+
     fun setSpatialAudio(value: Boolean) {
         spatialAudio.value = value
         prefs.edit().putBoolean(KEY_SPATIAL_AUDIO, value).apply()
@@ -1716,6 +1751,12 @@ object AppSettings {
     fun setKeepHome(value: Boolean) {
         keepHome.value = value
         prefs.edit().putBoolean(KEY_KEEP_HOME, value).apply()
+    }
+
+    fun setHideAiMusic(value: Boolean) {
+        hideAiMusic.value = value
+        com.music.bitchord.data.aimusic.HideAiMusic.apply(value)
+        prefs.edit().putBoolean(KEY_HIDE_AI_MUSIC, value).apply()
     }
 
     fun setDisableHaptics(value: Boolean) {
@@ -2581,6 +2622,7 @@ object AppSettings {
     private const val KEY_LOUDNESS_OFF_ON_SPEAKER = "loudness_off_on_speaker"
     private const val KEY_DOLBY_ATMOS = "dolby_atmos"
     private const val KEY_DIRECT_SOURCE_STREAM = "direct_source_stream"
+    private const val KEY_YOUTUBE_PREMIUM_AUDIO = "youtube_hq_audio"
     private const val KEY_SPATIAL_AUDIO = "spatial_audio"
     private const val KEY_EQ_ENABLED = "equalizer_enabled"
     private const val KEY_EQ_MODE = "equalizer_mode"
@@ -2601,6 +2643,7 @@ object AppSettings {
     private const val KEY_REDUCE_ANIMATION = "reduce_animation"
     private const val KEY_HIGH_PERFORMANCE_MODE = "high_performance_mode"
     private const val KEY_DISABLE_HAPTICS = "disable_haptics"
+    private const val KEY_HIDE_AI_MUSIC = "hide_ai_music"
     private const val KEY_PERFORMANCE_REFRESH_RATE = "performance_refresh_rate"
     private const val KEY_PERFORMANCE_MODE = "performance_mode"
     private const val KEY_PERFORMANCE_MODE_SAVED = "performance_mode_saved"

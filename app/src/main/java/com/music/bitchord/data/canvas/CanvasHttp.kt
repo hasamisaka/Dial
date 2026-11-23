@@ -25,15 +25,20 @@ internal fun canvasGet(url: String, headers: Map<String, String> = emptyMap()): 
 /**
  * Same as [canvasGet], but keeps the status code even on failure — for the
  * few callers where "it wasn't a 2xx" needs to say *which* code, rather than
- * collapsing every kind of failure into the same null.
+ * collapsing every kind of failure into the same null. With [keepErrorBody],
+ * the body of a failed answer is kept too (to read an error message in it).
  */
-internal fun canvasGetWithStatus(url: String, headers: Map<String, String> = emptyMap()): Pair<Int, String?> {
+internal fun canvasGetWithStatus(
+    url: String,
+    headers: Map<String, String> = emptyMap(),
+    keepErrorBody: Boolean = false,
+): Pair<Int, String?> {
     val request = Request.Builder().url(url).apply {
         headers.forEach { (name, value) -> header(name, value) }
     }.build()
     return runCatching {
         Http.client.newCall(request).execute().use { response ->
-            response.code to if (response.isSuccessful) response.body?.string() else null
+            response.code to if (response.isSuccessful || keepErrorBody) response.body?.string() else null
         }
     }.getOrDefault(-1 to null)
 }

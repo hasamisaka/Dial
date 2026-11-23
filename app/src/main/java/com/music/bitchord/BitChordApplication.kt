@@ -94,6 +94,8 @@ class BitChordApplication : Application(), SingletonImageLoader.Factory, Configu
         com.music.bitchord.data.ContentCountry.chosen = { AppSettings.contentCountry.value }
         migrateScriptOnlyAppLocale()
         LyricsTranslation.cacheDir = cacheDir
+        // The Spotify web player's query hashes are kept here until the web player changes.
+        com.music.bitchord.data.spotify.SpotifyQueryHashes.cacheDir = cacheDir
         // PlaybackService shares this process, so seeding the cookie here means
         // stream resolution is authenticated from the first play onwards.
         authStore = AuthStore(this)
@@ -196,7 +198,11 @@ class BitChordApplication : Application(), SingletonImageLoader.Factory, Configu
         // suspend call chain that reaches it (a track's canvas lookup) has
         // one to hand — see SpotifyToken's doc for why.
         SpotifyToken.init(this)
+        // Spotify's own lyrics, asked with the same sign-in; see SpotifyLyrics.
+        com.music.bitchord.data.spotify.SpotifyAccountLyrics.install()
         com.music.bitchord.data.spotify.SpotifyPlayedSync.init(this)
+        // After AppSettings: it follows the Spotify sign-in, and the plans it keeps show at once.
+        com.music.bitchord.data.AccountPlanState.init(this)
         // A sideloaded update is just a new APK over the old one, so app data —
         // including whatever the old build left in the image cache — survives
         // it untouched. Wipe that on the first launch of a higher versionCode so

@@ -100,6 +100,8 @@
     <string name="testing">Testando…</string>
     <string name="connected">Conectado</string>
     <string name="account_integrations">Conta e integrações</string>
+    <string name="youtube_premium_audio">Áudio de alta qualidade</string>
+    <string name="youtube_premium_audio_subtitle">Reproduzir o áudio Opus a 256 kbps em vez dos 160 kbps padrão</string>
     <string name="account_scrobbling">Conta e scrobbling</string>
     <string name="rich_presence">Presença avançada</string>
     <string name="scrobbling">Scrobbling</string>
@@ -275,6 +277,9 @@
     <string name="high_performance_battery_needed">Defina o uso da bateria do Dial como Irrestrito. Toque aqui para abrir as configurações.</string>
     <string name="disable_haptics">Desativar resposta tátil</string>
     <string name="disable_haptics_subtitle">Para todas as vibrações no Dial</string>
+    <string name="hide_ai_music">Ocultar música de IA</string>
+    <string name="hide_ai_music_subtitle" formatted="false">Remove músicas de artistas de IA conhecidos da pesquisa, do Início, dos mixes e do rádio. Este filtro não é 100% eficaz.</string>
+    <string name="hide_ai_music_sources">Listas: Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist. O Dial atualiza as listas uma vez por dia.</string>
     <string name="static_background">Cores de fundo estáticas</string>
     <string name="static_background_subtitle">Para o movimento das cores atrás das páginas do app</string>
     <string name="enable">Ativar</string>
@@ -1520,4 +1525,10 @@
     <string name="episode_filter_in_progress">Em andamento</string>
     <string name="episode_filter_played">Reproduzidos</string>
     <string name="episode_filter_none">Nenhum episódio neste filtro.</string>
+    <string name="spotify_dial_seeds">Sugestões do Spotify a partir de</string>
+    <string name="spotify_dial_seeds_plays">Reproduções no Dial</string>
+    <string name="spotify_dial_seeds_top">Top do Spotify</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">Gratuito</string>
+    <string name="youtube_premium_audio_needs_premium">Só com YouTube Music Premium</string>
 </resources>
