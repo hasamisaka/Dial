@@ -28,6 +28,7 @@ import com.music.bitchord.data.podcasts.PodcastSource
 import com.music.bitchord.data.settings.AppSettings
 import com.music.bitchord.data.settings.CustomizationSettings
 import com.music.bitchord.data.settings.SpeedDialSource
+import com.music.bitchord.data.settings.SpotifyDialSeeds
 import com.music.bitchord.ui.screens.GlassMenuPanel
 import com.music.bitchord.ui.screens.MenuHeading
 import com.music.bitchord.ui.screens.SegmentedControl
@@ -52,6 +53,7 @@ fun HomeDialMenu(
     // Spotify is a choice only while a Spotify account is signed in.
     val spotifyToken by AppSettings.spotifySpdcToken.collectAsStateWithLifecycle()
     val sources = SpeedDialSource.choices(spotifyToken.isNotBlank())
+    val spotifySeeds by CustomizationSettings.spotifyDialSeeds.collectAsStateWithLifecycle()
     val artistDial by CustomizationSettings.artistDial.collectAsStateWithLifecycle()
     val feelingLucky by CustomizationSettings.feelingLucky.collectAsStateWithLifecycle()
     val mixesDial by CustomizationSettings.mixesDial.collectAsStateWithLifecycle()
@@ -76,6 +78,23 @@ fun HomeDialMenu(
                         glass = true,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 8.dp),
                     )
+                    // Only the Spotify dial has seeds to choose.
+                    AnimatedVisibility(
+                        visible = source.effective(spotifyToken.isNotBlank()) == SpeedDialSource.SPOTIFY,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically(),
+                    ) {
+                        Column {
+                            MenuHeading(stringResource(R.string.spotify_dial_seeds))
+                            SegmentedControl(
+                                options = spotifyDialSeedLabels(),
+                                selectedIndex = spotifySeeds.ordinal,
+                                onSelect = { CustomizationSettings.setSpotifyDialSeeds(SpotifyDialSeeds.entries[it]) },
+                                glass = true,
+                                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 8.dp),
+                            )
+                        }
+                    }
                     MenuHeading(stringResource(R.string.speed_dial_grid))
                     // On glass of its own, so the track reads as frosted over the panel.
                     SegmentedControl(
@@ -176,6 +195,17 @@ fun speedDialSourceLabels(sources: List<SpeedDialSource>): List<String> = source
             SpeedDialSource.HISTORY -> R.string.speed_dial_source_history
             SpeedDialSource.YOUTUBE -> R.string.speed_dial_source_youtube
             SpeedDialSource.SPOTIFY -> R.string.spotify
+        },
+    )
+}
+
+/** The Spotify dial seed picker's labels, in [SpotifyDialSeeds] order. */
+@Composable
+fun spotifyDialSeedLabels(): List<String> = SpotifyDialSeeds.entries.map { seeds ->
+    stringResource(
+        when (seeds) {
+            SpotifyDialSeeds.PLAYS -> R.string.spotify_dial_seeds_plays
+            SpotifyDialSeeds.TOP -> R.string.spotify_dial_seeds_top
         },
     )
 }

@@ -1429,4 +1429,7 @@
     <string name="episode_filter_in_progress">Đang nghe dở</string>
     <string name="episode_filter_played">Đã phát</string>
     <string name="episode_filter_none">Không có tập nào trong bộ lọc này.</string>
+    <string name="spotify_dial_seeds">Gợi ý Spotify dựa trên</string>
+    <string name="spotify_dial_seeds_plays">Lượt phát trong Dial</string>
+    <string name="spotify_dial_seeds_top">Top Spotify</string>
 </resources>

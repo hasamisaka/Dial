@@ -1280,4 +1280,7 @@
     <string name="episode_filter_in_progress">재생 중</string>
     <string name="episode_filter_played">재생함</string>
     <string name="episode_filter_none">이 필터에 해당하는 에피소드가 없습니다.</string>
+    <string name="spotify_dial_seeds">Spotify 추천 기준</string>
+    <string name="spotify_dial_seeds_plays">Dial 재생 기록</string>
+    <string name="spotify_dial_seeds_top">Spotify 상위 항목</string>
 </resources>

@@ -22,6 +22,15 @@ enum class SpeedDialSource {
     }
 }
 
+/**
+ * What the Spotify speed dial's picks start from: the songs played in Dial
+ * lately (the default), or the account's own top songs and artists on
+ * Spotify over the last four weeks, six months and year.
+ */
+enum class SpotifyDialSeeds {
+    PLAYS, TOP,
+}
+
 /** The dial's tiles past the pins, and which of them are new releases (for their tag). */
 data class DialPicks(
     val items: List<ShelfItem>,
@@ -50,6 +59,7 @@ data class DialLayout(
     val artistDial: Boolean,
     val feelingLucky: Boolean,
     val speedDialSource: SpeedDialSource,
+    val spotifyDialSeeds: SpotifyDialSeeds,
     val speedDialRows: Int,
     val dialTileStyle: DialTileStyle,
     val dialLabels: Boolean,

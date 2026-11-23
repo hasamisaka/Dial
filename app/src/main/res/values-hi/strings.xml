@@ -1515,4 +1515,7 @@
     <string name="episode_filter_in_progress">जारी</string>
     <string name="episode_filter_played">चलाए गए</string>
     <string name="episode_filter_none">इस फ़िल्टर में कोई एपिसोड नहीं।</string>
+    <string name="spotify_dial_seeds">Spotify सुझाव इनसे</string>
+    <string name="spotify_dial_seeds_plays">Dial में चलाए गए</string>
+    <string name="spotify_dial_seeds_top">Spotify टॉप</string>
 </resources>

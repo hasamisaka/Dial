@@ -46,8 +46,11 @@ object SpotifyRadio {
         val named: Boolean get() = title.isNotBlank() && artist.isNotBlank()
     }
 
-    fun stationUrl(trackId: String, count: Int): String =
-        "$STATIONS/spotify:track:$trackId?count=${count.coerceIn(1, 100)}&autoplay=true"
+    fun stationUrl(trackId: String, count: Int): String = seedStationUrl("spotify:track:$trackId", count)
+
+    /** The station for any seed [uri]: a song (`spotify:track:…`) or an artist (`spotify:artist:…`). */
+    fun seedStationUrl(uri: String, count: Int): String =
+        "$STATIONS/$uri?count=${count.coerceIn(1, 100)}&autoplay=true"
 
     /** Asks which radio playlist Spotify makes from the song (its "inspired by" mix). */
     fun mixUrl(trackId: String): String = "$MIXES/spotify:track:$trackId?response-format=json"

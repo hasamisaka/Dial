@@ -1484,7 +1484,11 @@ fun SettingsScreen(
                 )
             }
             val speedDialSourceTitle = stringResource(R.string.speed_dial_source)
-            row(speedDialSourceTitle, "speed dial", "history", "youtube", "yt music", "official", "recommends", "spotify") {
+            val spotifyDialSeedsTitle = stringResource(R.string.spotify_dial_seeds)
+            row(
+                speedDialSourceTitle, "speed dial", "history", "youtube", "yt music", "official", "recommends", "spotify",
+                spotifyDialSeedsTitle, "top",
+            ) {
                 SettingsRow(icon = Icons.Rounded.CropSquare, title = speedDialSourceTitle)
                 val spotifyToken by AppSettings.spotifySpdcToken.collectAsStateWithLifecycle()
                 val sources = SpeedDialSource.choices(spotifyToken.isNotBlank())
@@ -1494,6 +1498,26 @@ fun SettingsScreen(
                     onSelect = { CustomizationSettings.setSpeedDialSource(sources[it]) },
                     modifier = Modifier.padding(start = ROW_INSET, end = ROW_INSET, bottom = 14.dp),
                 )
+                // The Spotify dial's seeds: the plays here, or the account's top lists.
+                if (speedDialSource.effective(spotifyToken.isNotBlank()) == SpeedDialSource.SPOTIFY) {
+                    val spotifySeeds by CustomizationSettings.spotifyDialSeeds.collectAsStateWithLifecycle()
+                    Text(
+                        text = spotifyDialSeedsTitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = ROW_INSET, end = ROW_INSET, bottom = 6.dp),
+                    )
+                    SegmentedControl(
+                        options = com.music.bitchord.ui.components.spotifyDialSeedLabels(),
+                        selectedIndex = spotifySeeds.ordinal,
+                        onSelect = {
+                            CustomizationSettings.setSpotifyDialSeeds(
+                                com.music.bitchord.data.settings.SpotifyDialSeeds.entries[it],
+                            )
+                        },
+                        modifier = Modifier.padding(start = ROW_INSET, end = ROW_INSET, bottom = 14.dp),
+                    )
+                }
             }
             val speedDialGridTitle = stringResource(R.string.speed_dial_grid)
             row(speedDialGridTitle, "speed dial", "grid", "rows", "tiles") {

@@ -110,6 +110,10 @@ class SpotifyRadioTest {
             SpotifyRadio.stationUrl("abc", 20),
         )
         assertEquals(
+            "https://spclient.wg.spotify.com/radio-apollo/v3/stations/spotify:artist:xyz?count=12&autoplay=true",
+            SpotifyRadio.seedStationUrl("spotify:artist:xyz", 12),
+        )
+        assertEquals(
             "https://spclient.wg.spotify.com/inspiredby-mix/v2/seed_to_playlist/spotify:track:abc?response-format=json",
             SpotifyRadio.mixUrl("abc"),
         )

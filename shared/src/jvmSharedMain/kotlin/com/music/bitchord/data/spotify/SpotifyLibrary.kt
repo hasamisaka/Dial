@@ -66,6 +66,27 @@ data class SpotifySearch(
     val topUri: String? = null,
 )
 
+/**
+ * The span of one of the account's top lists on Spotify. [wire] is the value
+ * the web player's `userTopContent` query takes; "MEDIUM_TERM" is refused.
+ */
+enum class SpotifyTopRange(val wire: String) {
+    /** About four weeks. */
+    SHORT("SHORT_TERM"),
+
+    /** About six months. */
+    MID("MID_TERM"),
+
+    /** About a year. */
+    LONG("LONG_TERM"),
+}
+
+/** The account's top songs and artists on Spotify over one [SpotifyTopRange], most played first. */
+data class SpotifyTopContent(
+    val tracks: List<SpotifyTrack>,
+    val artists: List<SpotifyArtist>,
+)
+
 object SpotifyLibrary {
     /** The web player's bearer, and its client token when there is one. */
     class Tokens(val bearer: String, val clientToken: String?)
@@ -99,6 +120,17 @@ object SpotifyLibrary {
     private val HOME = listOf(
         "5fb7da7a03ee2776c0670856609cb85a189a3cecc36cc160b91cde79063b9cf1",
         "23e37f2e58d82d567f27080101d36609009d8c3676457b1086cb0acc55b72a5d",
+    )
+    /**
+     * The profile page's top songs and artists query, newest first. The first
+     * is the web player's (read off its requests on 2026-10-21, as listed by
+     * the Spotifly client), the second the desktop app's. This operation is
+     * not named in the web player's first scripts, so it can't be looked up
+     * there the way the Canvas query is.
+     */
+    private val TOP_CONTENT = listOf(
+        "61b7353d3625780022dbc63d459eb64cd609e7e5e2a820f9160d65030efe2e15",
+        "49ee15704de4a7fdeac65a02db20604aa11e46f02e809c55d9a89f6db9754356",
     )
     /** One shelf of the home page on its own, for when the whole page can't be read. */
     private const val HOME_SECTION = "eb3fba2d388cf4fc4d696b1757a58584e9538a3b515ea742e9cc9465807340be"
@@ -160,6 +192,38 @@ object SpotifyLibrary {
             }
             parseHomeSectionPlaylists(gql("homeSection", HOME_SECTION, variables, headers))
         }
+    }
+
+    /**
+     * The account's top songs and artists over [range], as its profile page
+     * shows them: Spotify's own ranking, most played first, at most [limit]
+     * of each. A read-only query; nothing is sent back to the account.
+     */
+    suspend fun topContent(range: SpotifyTopRange, limit: Int = 10): SpotifyTopContent = withContext(Dispatchers.IO) {
+        val headers = authHeaders()
+        val input = buildJsonObject {
+            put("offset", 0)
+            put("limit", limit.coerceIn(1, 50))
+            put("sortBy", "AFFINITY")
+            put("timeRange", range.wire)
+        }
+        val variables = buildJsonObject {
+            put("includeTopArtists", true)
+            put("topArtistsInput", input)
+            put("includeTopTracks", true)
+            put("topTracksInput", input)
+        }
+        var failure: Exception? = null
+        for (hash in TOP_CONTENT) {
+            try {
+                return@withContext parseTopContent(gql("userTopContent", hash, variables, headers))
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                failure = error
+            }
+        }
+        throw failure ?: IllegalStateException("Spotify top content unavailable")
     }
 
     /**
@@ -551,6 +615,51 @@ internal fun parseSearchTracks(root: JsonObject): List<SpotifyTrack> {
             imageUrl = album?.obj("coverArt")?.arr("sources")?.lastUrl(),
         )
     }
+}
+
+/**
+ * The top songs and artists of a `userTopContent` answer, in Spotify's
+ * order: `data.me.profile.topTracks.items[].data` and the same for
+ * `topArtists`. A list the answer doesn't hold is empty; an answer with
+ * neither list fails, so the caller can try the next hash.
+ */
+internal fun parseTopContent(root: JsonObject): SpotifyTopContent {
+    val profile = root.obj("data")?.obj("me")?.obj("profile")
+    val trackItems = profile?.obj("topTracks")?.arr("items")
+    val artistItems = profile?.obj("topArtists")?.arr("items")
+    if (trackItems == null && artistItems == null) throw IllegalStateException("Spotify top content was empty")
+    fun JsonArray.datas(): List<JsonObject> = mapNotNull { element ->
+        runCatching { element.jsonObject }.getOrNull()?.obj("data")
+    }
+    fun JsonObject.widest(): String? = arr("sources")
+        ?.mapNotNull { source ->
+            val entry = runCatching { source.jsonObject }.getOrNull() ?: return@mapNotNull null
+            val url = entry.str("url") ?: return@mapNotNull null
+            url to (entry.int("width") ?: entry.int("maxWidth") ?: 0)
+        }
+        ?.maxByOrNull { it.second }
+        ?.first
+    val tracks = trackItems?.datas().orEmpty().mapNotNull { data ->
+        val uri = data.str("uri")?.takeIf { it.startsWith("spotify:track:") } ?: return@mapNotNull null
+        val title = data.str("name")?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+        val album = data.obj("albumOfTrack")
+        SpotifyTrack(
+            id = uri.substringAfterLast(":"),
+            title = title,
+            artist = data.obj("artists")?.arr("items").orEmpty().mapNotNull { artist ->
+                runCatching { artist.jsonObject }.getOrNull()?.obj("profile")?.str("name")?.takeIf { it.isNotBlank() }
+            }.joinToString(", "),
+            album = album?.str("name"),
+            durationMs = data.obj("duration")?.int("totalMilliseconds") ?: 0,
+            imageUrl = album?.obj("coverArt")?.widest(),
+        )
+    }
+    val artists = artistItems?.datas().orEmpty().mapNotNull { data ->
+        val uri = data.str("uri")?.takeIf { it.startsWith("spotify:artist:") } ?: return@mapNotNull null
+        val name = data.obj("profile")?.str("name")?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+        SpotifyArtist(uri.substringAfterLast(":"), name, data.obj("visuals")?.obj("avatarImage")?.widest())
+    }
+    return SpotifyTopContent(tracks, artists)
 }
 
 /**

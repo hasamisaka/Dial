@@ -1515,4 +1515,7 @@
     <string name="episode_filter_in_progress">Begonnen</string>
     <string name="episode_filter_played">Gehört</string>
     <string name="episode_filter_none">Keine Folgen in diesem Filter.</string>
+    <string name="spotify_dial_seeds">Spotify-Vorschläge aus</string>
+    <string name="spotify_dial_seeds_plays">Wiedergaben in Dial</string>
+    <string name="spotify_dial_seeds_top">Spotify-Top</string>
 </resources>
