@@ -2,6 +2,7 @@ package com.music.bitchord.data.spotify
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class SpotifyRadioTest {
@@ -34,6 +35,37 @@ class SpotifyRadioTest {
     @Test
     fun readsItemsWhenThereAreNoTracks() {
         assertEquals(listOf("a"), SpotifyRadio.parse("""{"tracks":[],"items":[{"id":"a","name":"x"}]}""").map { it.id })
+    }
+
+    @Test
+    fun readsThePlaylistExtenderAnswer() {
+        val body = """
+            {"recommendedTracks":[
+              {"id":"a","name":"Yellow","artists":[{"id":"x","name":"Coldplay"}],"album":{"id":"y","name":"Parachutes"},"score":0.9},
+              {"id":"b","name":"Clocks","artists":[{"id":"x","name":"Coldplay"}]}
+            ]}
+        """.trimIndent()
+        assertEquals(
+            listOf(SpotifyRadio.Pick("a", "Yellow", "Coldplay"), SpotifyRadio.Pick("b", "Clocks", "Coldplay")),
+            SpotifyRadio.parse(body),
+        )
+    }
+
+    @Test
+    fun theMixIsTheFirstPlaylistInTheAnswer() {
+        val body = """{"mediaItems":[{"uri":"spotify:track:a"},{"uri":"spotify:playlist:37i9dQZF1E8abc"},{"uri":"spotify:playlist:other"}]}"""
+        assertEquals("37i9dQZF1E8abc", SpotifyRadio.mixPlaylistId(body))
+        assertNull(SpotifyRadio.mixPlaylistId("""{"mediaItems":[{"uri":"spotify:track:a"}]}"""))
+        assertNull(SpotifyRadio.mixPlaylistId("""{"error":{"status":404}}"""))
+        assertNull(SpotifyRadio.mixPlaylistId("<html>"))
+    }
+
+    @Test
+    fun theExtenderBodyNamesThePlaylistAndTheSkips() {
+        assertEquals(
+            """{"playlistURI":"spotify:playlist:p","trackSkipIDs":["a","b"],"numResults":100}""",
+            SpotifyRadio.extenderBody("p", skip = listOf("a", "b", "a"), count = 500),
+        )
     }
 
     @Test
@@ -77,7 +109,15 @@ class SpotifyRadioTest {
             "https://spclient.wg.spotify.com/radio-apollo/v3/stations/spotify:track:abc?count=20&autoplay=true",
             SpotifyRadio.stationUrl("abc", 20),
         )
-        assertEquals("https://api.spotify.com/v1/recommendations?seed_tracks=abc&limit=100", SpotifyRadio.recommendationsUrl("abc", 500))
+        assertEquals(
+            "https://spclient.wg.spotify.com/radio-apollo/v3/stations/spotify:artist:xyz?count=12&autoplay=true",
+            SpotifyRadio.seedStationUrl("spotify:artist:xyz", 12),
+        )
+        assertEquals(
+            "https://spclient.wg.spotify.com/inspiredby-mix/v2/seed_to_playlist/spotify:track:abc?response-format=json",
+            SpotifyRadio.mixUrl("abc"),
+        )
+        assertEquals("https://spclient.wg.spotify.com/playlistextender/extendp/", SpotifyRadio.EXTENDER)
         assertEquals("https://api.spotify.com/v1/tracks?ids=a,b", SpotifyRadio.tracksUrl(listOf("a", "b")))
     }
 }

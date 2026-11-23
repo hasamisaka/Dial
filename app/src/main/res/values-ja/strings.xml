@@ -93,6 +93,8 @@
     <string name="testing">テスト中…</string>
     <string name="connected">接続済み</string>
     <string name="account_integrations">アカウントと連携</string>
+    <string name="youtube_premium_audio">高音質オーディオ</string>
+    <string name="youtube_premium_audio_subtitle">標準の160 kbpsではなく256 kbpsのOpus音声をストリーミング</string>
     <string name="account_scrobbling">アカウントとスクロブリング</string>
     <string name="rich_presence">リッチプレゼンス</string>
     <string name="scrobbling">スクロブリング</string>
@@ -268,6 +270,9 @@
     <string name="high_performance_battery_needed">Dialのバッテリー使用を「制限なし」に設定してください。ここをタップすると設定が開きます。</string>
     <string name="disable_haptics">触覚フィードバックを無効にする</string>
     <string name="disable_haptics_subtitle">Dialのすべての振動フィードバックを停止します</string>
+    <string name="hide_ai_music">AI音楽を非表示</string>
+    <string name="hide_ai_music_subtitle" formatted="false">既知のAIアーティストの曲を検索、ホーム、ミックス、ラジオから除外します。このフィルターは100%有効ではありません。</string>
+    <string name="hide_ai_music_sources">リスト: Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist。Dialは1日1回リストを更新します。</string>
     <string name="static_background">背景色を静止</string>
     <string name="static_background_subtitle">アプリのページの背景にある色の動きを止めます</string>
     <string name="enable">有効にする</string>
@@ -1493,4 +1498,10 @@
     <string name="episode_filter_in_progress">再生中</string>
     <string name="episode_filter_played">再生済み</string>
     <string name="episode_filter_none">この条件のエピソードはありません。</string>
+    <string name="spotify_dial_seeds">Spotify のおすすめの元</string>
+    <string name="spotify_dial_seeds_plays">Dial での再生</string>
+    <string name="spotify_dial_seeds_top">Spotify のトップ</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">無料</string>
+    <string name="youtube_premium_audio_needs_premium">YouTube Music Premium専用</string>
 </resources>

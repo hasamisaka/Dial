@@ -192,6 +192,8 @@ import com.music.bitchord.ui.icons.BitChordIcons
 import com.music.bitchord.ui.performance.resolvePerformanceRefreshRate
 import com.music.bitchord.ui.performance.supportedPerformanceRefreshRates
 import com.music.bitchord.data.model.Account
+import com.music.bitchord.data.AccountPlan
+import com.music.bitchord.ui.components.PlanBadge
 import com.music.bitchord.data.LocalMediaRepository
 import com.music.bitchord.data.NerdStats
 import com.music.bitchord.data.scrobbling.LastFM
@@ -1484,7 +1486,11 @@ fun SettingsScreen(
                 )
             }
             val speedDialSourceTitle = stringResource(R.string.speed_dial_source)
-            row(speedDialSourceTitle, "speed dial", "history", "youtube", "yt music", "official", "recommends", "spotify") {
+            val spotifyDialSeedsTitle = stringResource(R.string.spotify_dial_seeds)
+            row(
+                speedDialSourceTitle, "speed dial", "history", "youtube", "yt music", "official", "recommends", "spotify",
+                spotifyDialSeedsTitle, "top",
+            ) {
                 SettingsRow(icon = Icons.Rounded.CropSquare, title = speedDialSourceTitle)
                 val spotifyToken by AppSettings.spotifySpdcToken.collectAsStateWithLifecycle()
                 val sources = SpeedDialSource.choices(spotifyToken.isNotBlank())
@@ -1494,6 +1500,26 @@ fun SettingsScreen(
                     onSelect = { CustomizationSettings.setSpeedDialSource(sources[it]) },
                     modifier = Modifier.padding(start = ROW_INSET, end = ROW_INSET, bottom = 14.dp),
                 )
+                // The Spotify dial's seeds: the plays here, or the account's top lists.
+                if (speedDialSource.effective(spotifyToken.isNotBlank()) == SpeedDialSource.SPOTIFY) {
+                    val spotifySeeds by CustomizationSettings.spotifyDialSeeds.collectAsStateWithLifecycle()
+                    Text(
+                        text = spotifyDialSeedsTitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = ROW_INSET, end = ROW_INSET, bottom = 6.dp),
+                    )
+                    SegmentedControl(
+                        options = com.music.bitchord.ui.components.spotifyDialSeedLabels(),
+                        selectedIndex = spotifySeeds.ordinal,
+                        onSelect = {
+                            CustomizationSettings.setSpotifyDialSeeds(
+                                com.music.bitchord.data.settings.SpotifyDialSeeds.entries[it],
+                            )
+                        },
+                        modifier = Modifier.padding(start = ROW_INSET, end = ROW_INSET, bottom = 14.dp),
+                    )
+                }
             }
             val speedDialGridTitle = stringResource(R.string.speed_dial_grid)
             row(speedDialGridTitle, "speed dial", "grid", "rows", "tiles") {
@@ -2017,6 +2043,10 @@ fun SettingsScreen(
         // No footer: it only restated the stop-on-close row's own subtitle,
         // which sits four rows above it and says the same thing in fewer words.
         if (shows(SettingsCategory.MISCELLANEOUS)) SearchableSettingsGroup(search, header = stringResource(R.string.miscellaneous)) {
+            val hideAiMusicTitle = stringResource(R.string.hide_ai_music)
+            row(hideAiMusicTitle, "ai", "artificial", "generated", "suno", "udio", "slop", "filter", "block", "hide") {
+                HideAiMusicRow(title = hideAiMusicTitle)
+            }
             val checkUpdatesTitle = stringResource(R.string.check_for_updates)
             row(checkUpdatesTitle, "update", "version", "release", "upgrade", "new version") {
                 val update by com.music.bitchord.data.AppUpdateChecker.available.collectAsStateWithLifecycle()
@@ -2724,6 +2754,8 @@ internal fun AccountCard(
     onClick: (() -> Unit)? = null,
     /** Sits inside a [SettingsGroup] that already supplies the card, so draws none of its own. */
     grouped: Boolean = false,
+    /** The account's plan, shown as a [PlanBadge] after the name; nothing when null. */
+    plan: AccountPlan? = null,
 ) {
     Row(
         modifier = Modifier
@@ -2772,14 +2804,18 @@ internal fun AccountCard(
         }
         Spacer(Modifier.width(14.dp))
         Column(Modifier.weight(1f)) {
-            Text(
-                text = account?.name
-                    ?: stringResource(if (signedIn) R.string.signed_in else R.string.not_signed_in),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = account?.name
+                        ?: stringResource(if (signedIn) R.string.signed_in else R.string.not_signed_in),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                if (signedIn) PlanBadge(plan, Modifier.padding(start = 10.dp))
+            }
             Spacer(Modifier.height(2.dp))
             Text(
                 text = account?.email?.takeIf { it.isNotBlank() }
@@ -3792,6 +3828,8 @@ internal fun SettingsRow(
     trailing: (@Composable () -> Unit)? = null,
     /** Red title and glyph, for a row that logs out or disconnects — see [destructiveRed]. */
     danger: Boolean = false,
+    /** Drawn after the title on its line, such as the account plan's [PlanBadge]. */
+    titleBadge: (@Composable () -> Unit)? = null,
 ) {
     val ink = if (danger) destructiveRed() else MaterialTheme.colorScheme.onBackground
     Row(
@@ -3831,6 +3869,10 @@ internal fun SettingsRow(
                 if (badge != null) {
                     Spacer(Modifier.width(8.dp))
                     Badge(badge)
+                }
+                if (titleBadge != null) {
+                    Spacer(Modifier.width(8.dp))
+                    titleBadge()
                 }
             }
             if (subtitleContent != null) {

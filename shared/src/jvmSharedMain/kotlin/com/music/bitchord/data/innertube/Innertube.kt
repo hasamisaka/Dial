@@ -783,6 +783,30 @@ object Innertube {
         return ExternalPodcasts.enclosureIn(response)
     }
 
+    /**
+     * The signed-in `player` answer for [videoId], read only for the audio formats it lists —
+     * see [com.music.bitchord.data.AccountPlans.youtubeFromPlayer]. Null for guests.
+     *
+     * Asked the same way as [playbackTracking], with the current [signatureTimestamp]: without
+     * one the answer can be "The page needs to be reloaded" and list no formats.
+     */
+    suspend fun signedInPlayer(videoId: String, signatureTimestamp: Int?): JsonObject? {
+        if (cookie == null) return null
+        ensureSessionScope()
+        return postMusic("player") {
+            put("videoId", videoId)
+            put("contentCheckOk", true)
+            put("racyCheckOk", true)
+            putJsonObject("playbackContext") {
+                putJsonObject("contentPlaybackContext") {
+                    put("html5Preference", "HTML5_PREF_WANTS")
+                    put("referer", "$MUSIC_ORIGIN/watch?v=$videoId")
+                    signatureTimestamp?.let { put("signatureTimestamp", it) }
+                }
+            }
+        }
+    }
+
     /** What YouTube Music itself schedules `atr` for, when it doesn't say. */
     private const val DEFAULT_ATR_SECONDS = 5L
 

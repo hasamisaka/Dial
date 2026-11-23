@@ -99,6 +99,8 @@
     <string name="testing">Đang kiểm tra…</string>
     <string name="connected">Đã kết nối</string>
     <string name="account_integrations">Tài khoản &amp; tích hợp</string>
+    <string name="youtube_premium_audio">Âm thanh chất lượng cao</string>
+    <string name="youtube_premium_audio_subtitle">Phát âm thanh Opus 256 kbps thay vì 160 kbps tiêu chuẩn</string>
     <string name="account_scrobbling">Tài khoản &amp; scrobbling</string>
     <string name="rich_presence">Trạng thái hoạt động (Rich presence)</string>
     <string name="scrobbling">Scrobbling</string>
@@ -323,6 +325,9 @@
     <string name="high_performance_battery_needed">Hãy đặt mức sử dụng pin của Dial thành Không hạn chế. Nhấn vào đây để mở cài đặt.</string>
     <string name="disable_haptics">Tắt phản hồi xúc giác</string>
     <string name="disable_haptics_subtitle">Dừng mọi phản hồi rung trong Dial</string>
+    <string name="hide_ai_music">Ẩn nhạc AI</string>
+    <string name="hide_ai_music_subtitle" formatted="false">Xóa bài hát của các nghệ sĩ AI đã biết khỏi tìm kiếm, Trang chủ, mix và radio. Bộ lọc này không hiệu quả 100%.</string>
+    <string name="hide_ai_music_sources">Danh sách: Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist. Dial cập nhật danh sách mỗi ngày một lần.</string>
     <string name="static_background">Màu nền tĩnh</string>
     <string name="static_background_subtitle">Dừng chuyển động của các màu phía sau các trang của ứng dụng</string>
     <string name="enable">Bật</string>
@@ -1429,4 +1434,10 @@
     <string name="episode_filter_in_progress">Đang nghe dở</string>
     <string name="episode_filter_played">Đã phát</string>
     <string name="episode_filter_none">Không có tập nào trong bộ lọc này.</string>
+    <string name="spotify_dial_seeds">Gợi ý Spotify dựa trên</string>
+    <string name="spotify_dial_seeds_plays">Lượt phát trong Dial</string>
+    <string name="spotify_dial_seeds_top">Top Spotify</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">Miễn phí</string>
+    <string name="youtube_premium_audio_needs_premium">Chỉ dành cho YouTube Music Premium</string>
 </resources>

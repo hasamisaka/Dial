@@ -112,14 +112,10 @@ object SpotifyPlayedList {
     /** Where the web player makes a playlist; it answers with the new playlist's uri. */
     const val WEB_CREATE_URL = "https://spclient.wg.spotify.com/playlist/v2/playlist"
 
-    const val PROFILE_OPERATION = "profileAttributes"
-    const val ADD_OPERATION = "addToPlaylist"
-    const val REMOVE_OPERATION = "removeFromPlaylist"
-
-    /** The last hashes known for the three; the live ones are read off the web player's scripts first. */
-    const val KNOWN_PROFILE_HASH = "53bcb064f6cd18c23f752bc324a791194d20df612d8e1239c735144ab0399ced"
-    const val KNOWN_ADD_HASH = "47c69e71df79e3c80e4af7e7a9a727d82565bb20ae20dc820d6bc6f94def482d"
-    const val KNOWN_REMOVE_HASH = "47c69e71df79e3c80e4af7e7a9a727d82565bb20ae20dc820d6bc6f94def482d"
+    /** The three operations; their hashes come from [SpotifyQueryHashes]. */
+    const val PROFILE_OPERATION = SpotifyQueryHashes.PROFILE_ATTRIBUTES
+    const val ADD_OPERATION = SpotifyQueryHashes.ADD_TO_PLAYLIST
+    const val REMOVE_OPERATION = SpotifyQueryHashes.REMOVE_FROM_PLAYLIST
 
     /** Where a new playlist is put into [username]'s library; one made and not put there is an orphan. */
     fun rootlistUrl(username: String): String =

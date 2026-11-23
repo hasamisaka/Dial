@@ -98,6 +98,8 @@
     <string name="testing">Wird getestet…</string>
     <string name="connected">Verbunden</string>
     <string name="account_integrations">Konto &amp; Integrationen</string>
+    <string name="youtube_premium_audio">Hohe Audioqualität</string>
+    <string name="youtube_premium_audio_subtitle">Das Opus-Audio mit 256 kbps statt der üblichen 160 kbps streamen</string>
     <string name="account_scrobbling">Konto &amp; Scrobbling</string>
     <string name="rich_presence">Rich Presence</string>
     <string name="scrobbling">Scrobbling</string>
@@ -273,6 +275,9 @@
     <string name="high_performance_battery_needed">Stelle den Akkuverbrauch von Dial auf Uneingeschränkt. Tippe hier, um die Einstellungen zu öffnen.</string>
     <string name="disable_haptics">Haptik deaktivieren</string>
     <string name="disable_haptics_subtitle">Stoppt jedes Vibrationsfeedback in Dial</string>
+    <string name="hide_ai_music">KI-Musik ausblenden</string>
+    <string name="hide_ai_music_subtitle" formatted="false">Entfernt Songs bekannter KI-Künstler aus Suche, Startseite, Mixes und Radio. Dieser Filter ist nicht zu 100 % wirksam.</string>
+    <string name="hide_ai_music_sources">Listen: Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist. Dial lädt die Listen einmal am Tag neu.</string>
     <string name="static_background">Statische Hintergrundfarben</string>
     <string name="static_background_subtitle">Stoppt die Bewegung der Farben hinter den Seiten der App</string>
     <string name="enable">Aktivieren</string>
@@ -1515,4 +1520,10 @@
     <string name="episode_filter_in_progress">Begonnen</string>
     <string name="episode_filter_played">Gehört</string>
     <string name="episode_filter_none">Keine Folgen in diesem Filter.</string>
+    <string name="spotify_dial_seeds">Spotify-Vorschläge aus</string>
+    <string name="spotify_dial_seeds_plays">Wiedergaben in Dial</string>
+    <string name="spotify_dial_seeds_top">Spotify-Top</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">Kostenlos</string>
+    <string name="youtube_premium_audio_needs_premium">Nur mit YouTube Music Premium</string>
 </resources>

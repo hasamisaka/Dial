@@ -102,6 +102,8 @@
     <string name="testing">Test ediliyor…</string>
     <string name="connected">Bağlandı</string>
     <string name="account_integrations">Hesap ve entegrasyonlar</string>
+    <string name="youtube_premium_audio">Yüksek kaliteli ses</string>
+    <string name="youtube_premium_audio_subtitle">Standart 160 kbps yerine 256 kbps Opus sesi çal</string>
     <string name="account_scrobbling">Hesap ve scrobbling</string>
     <string name="rich_presence">Zengin varlık</string>
     <string name="scrobbling">Scrobbling</string>
@@ -313,6 +315,9 @@
     <string name="high_performance_battery_needed">Dial\'ın pil kullanımını Sınırsız olarak ayarlayın. Ayarları açmak için buraya dokunun.</string>
     <string name="disable_haptics">Dokunsal geri bildirimi kapat</string>
     <string name="disable_haptics_subtitle">Dial\'daki tüm titreşimleri durdurur</string>
+    <string name="hide_ai_music">Yapay zekâ müziğini gizle</string>
+    <string name="hide_ai_music_subtitle" formatted="false">Bilinen yapay zekâ sanatçılarının şarkılarını arama, Ana Sayfa, mix ve radyodan kaldırır. Bu filtre yüzde 100 etkili değildir.</string>
+    <string name="hide_ai_music_sources">Listeler: Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist. Dial listeleri günde bir kez günceller.</string>
     <string name="static_background">Sabit arka plan renkleri</string>
     <string name="static_background_subtitle">Uygulama sayfalarının arkasındaki renklerin hareketini durdurur</string>
     <string name="enable">Etkinleştir</string>
@@ -1472,4 +1477,10 @@
     <string name="episode_filter_in_progress">Devam ediyor</string>
     <string name="episode_filter_played">Oynatıldı</string>
     <string name="episode_filter_none">Bu filtrede bölüm yok.</string>
+    <string name="spotify_dial_seeds">Spotify önerilerinin kaynağı</string>
+    <string name="spotify_dial_seeds_plays">Dial\'daki dinlemeler</string>
+    <string name="spotify_dial_seeds_top">Spotify Top</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">Ücretsiz</string>
+    <string name="youtube_premium_audio_needs_premium">Yalnızca YouTube Music Premium ile</string>
 </resources>

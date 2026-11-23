@@ -93,6 +93,8 @@
     <string name="testing">測試中…</string>
     <string name="connected">已連線</string>
     <string name="account_integrations">賬號與整合</string>
+    <string name="youtube_premium_audio">高音質</string>
+    <string name="youtube_premium_audio_subtitle">串流 256 kbps Opus 音訊，而非標準的 160 kbps</string>
     <string name="account_scrobbling">賬號與Scrobbling</string>
     <string name="rich_presence">Rich Presence</string>
     <string name="scrobbling">Scrobbling</string>
@@ -270,6 +272,9 @@
     <string name="high_performance_battery_needed">請將 Dial 的電量使用設定為“不受限制”。點選這裡開啟設定。</string>
     <string name="disable_haptics">停用觸覺回饋</string>
     <string name="disable_haptics_subtitle">停止 Dial 中的所有震動回饋</string>
+    <string name="hide_ai_music">隱藏 AI 音樂</string>
+    <string name="hide_ai_music_subtitle" formatted="false">從搜尋、首頁、合輯和電台中移除已知 AI 藝人的歌曲。此篩選器並非 100% 有效。</string>
+    <string name="hide_ai_music_sources">清單：Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist。Dial 每天更新一次清單。</string>
     <string name="static_background">靜態背景顏色</string>
     <string name="static_background_subtitle">停止應用程式頁面背後顏色的移動</string>
     <string name="enable">啟用</string>
@@ -1494,4 +1499,10 @@
     <string name="episode_filter_in_progress">播放中</string>
     <string name="episode_filter_played">已播放</string>
     <string name="episode_filter_none">此篩選條件下沒有單集。</string>
+    <string name="spotify_dial_seeds">Spotify 推薦依據</string>
+    <string name="spotify_dial_seeds_plays">Dial 中的播放</string>
+    <string name="spotify_dial_seeds_top">Spotify 常聽</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">免費</string>
+    <string name="youtube_premium_audio_needs_premium">僅限 YouTube Music Premium</string>
 </resources>

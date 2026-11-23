@@ -11,6 +11,7 @@ import com.music.bitchord.data.lyrics.LyricWord
 import com.music.bitchord.data.lyrics.LyricsSource
 import com.music.bitchord.data.lyrics.ProviderLyrics
 import com.music.bitchord.data.lyrics.PaxSenix
+import com.music.bitchord.data.lyrics.SpotifyLyrics
 import com.music.bitchord.data.lyrics.normalizePaxSenixApiKey
 import com.music.bitchord.data.lyrics.toEnhancedLrc
 import com.music.bitchord.data.lyrics.youtubeStrings
@@ -23,9 +24,10 @@ class ProviderLyricsTest {
 
     @Test
     fun `the imported providers are exposed`() {
-        assertEquals(19, LyricsSource.entries.size)
+        assertEquals(20, LyricsSource.entries.size)
         assertTrue(LyricsSource.offered.containsAll(listOf(
             LyricsSource.BETTER_LYRICS_PORTATO,
+            LyricsSource.SPOTIFY,
             LyricsSource.PAXSENIX_SPOTIFY,
             LyricsSource.PAXSENIX_MUSIXMATCH,
             LyricsSource.YOUTUBE_TRANSCRIPT,
@@ -59,6 +61,70 @@ class ProviderLyricsTest {
     fun `a new source lands right after its declared neighbour`() {
         val saved = LyricsSource.offered - LyricsSource.BETTER_LYRICS_PORTATO
         assertEquals(LyricsSource.offered, LyricsSource.ordered(saved))
+    }
+
+    @Test
+    fun `Spotify sign-in lyrics come in just ahead of the PaxSenix Spotify route`() {
+        val saved = LyricsSource.offered - LyricsSource.SPOTIFY
+        val ordered = LyricsSource.ordered(saved)
+        assertEquals(ordered.indexOf(LyricsSource.PAXSENIX_SPOTIFY) - 1, ordered.indexOf(LyricsSource.SPOTIFY))
+    }
+
+    @Test
+    fun `Spotify line synced lyrics keep times and mark breaks`() {
+        val raw = """
+            {"lyrics":{"syncType":"LINE_SYNCED","lines":[
+              {"startTimeMs":"5000","words":"sing along","syllables":[],"endTimeMs":"0"},
+              {"startTimeMs":"7000","words":"♪","syllables":[],"endTimeMs":"0"},
+              {"startTimeMs":"15000","words":"once more","syllables":[],"endTimeMs":"0"}
+            ],"provider":"MusixMatch","language":"en"},"colors":{"background":-1}}
+        """.trimIndent()
+        val lines = SpotifyLyrics.parse(raw)!!
+        // An intro break, the two sung lines and the break between them.
+        assertEquals(listOf(0L, 5_000L, 7_000L, 15_000L), lines.map { it.timeMs })
+        assertEquals(listOf("", "sing along", "", "once more"), lines.map { it.text })
+        assertEquals(7_000L, lines[1].sungUntilMs)
+        assertTrue(lines.none { it.isWordSynced })
+    }
+
+    @Test
+    fun `Spotify unsynced lyrics are plain text`() {
+        val raw = """{"lyrics":{"syncType":"UNSYNCED","lines":[
+            {"startTimeMs":"0","words":"sing along","syllables":[],"endTimeMs":"0"},
+            {"startTimeMs":"0","words":"once more","syllables":[],"endTimeMs":"0"}]}}"""
+        val lines = SpotifyLyrics.parse(raw)!!
+        assertEquals(listOf("sing along", "once more"), lines.map { it.text })
+        assertTrue(lines.all { it.timeMs == 0L })
+    }
+
+    @Test
+    fun `Spotify syllable synced lyrics get word timing`() {
+        val raw = """{"lyrics":{"syncType":"SYLLABLE_SYNCED","lines":[
+            {"startTimeMs":"1000","words":"sing along","endTimeMs":"2000","syllables":[
+              {"startTimeMs":"1000","numChars":5},{"startTimeMs":"1400","numChars":1},
+              {"startTimeMs":"1500","numChars":4}]}]}}"""
+        val line = SpotifyLyrics.parse(raw)!!.single { !it.isGap }
+        assertEquals("sing along", line.text)
+        assertEquals(listOf("sing", "along"), line.words.map { it.text })
+        assertEquals(listOf(1_000L, 1_400L), line.words.map { it.startMs })
+        assertEquals(2_000L, line.words.last().endMs)
+    }
+
+    @Test
+    fun `Spotify syllables that do not fit the text leave the line timed as a whole`() {
+        val raw = """{"lyrics":{"syncType":"SYLLABLE_SYNCED","lines":[
+            {"startTimeMs":"1000","words":"sing along","endTimeMs":"2000","syllables":[
+              {"startTimeMs":"1000","numChars":3}]}]}}"""
+        val line = SpotifyLyrics.parse(raw)!!.single { !it.isGap }
+        assertEquals("sing along", line.text)
+        assertTrue(line.words.isEmpty())
+        assertEquals(2_000L, line.sungUntilMs)
+    }
+
+    @Test
+    fun `a Spotify answer with no lines is a miss`() {
+        assertEquals(null, SpotifyLyrics.parse("""{"lyrics":{"syncType":"LINE_SYNCED","lines":[]}}"""))
+        assertEquals(null, SpotifyLyrics.parse("not json"))
     }
 
     @Test

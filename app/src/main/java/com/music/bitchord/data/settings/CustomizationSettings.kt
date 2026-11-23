@@ -91,6 +91,7 @@ object CustomizationSettings {
     val dialPinIcon get() = DialSettings.dialPinIcon
     val dialTileStyle get() = DialSettings.dialTileStyle
     val speedDialSource get() = DialSettings.speedDialSource
+    val spotifyDialSeeds get() = DialSettings.spotifyDialSeeds
     val speedDialRows get() = DialSettings.speedDialRows
 
     val miniPlayerShape = MutableStateFlow(MiniPlayerShape.SQUARED)
@@ -758,6 +759,8 @@ object CustomizationSettings {
     }
 
     fun setSpeedDialSource(value: SpeedDialSource) = DialSettings.setSpeedDialSource(value)
+
+    fun setSpotifyDialSeeds(value: SpotifyDialSeeds) = DialSettings.setSpotifyDialSeeds(value)
 
     fun setSpeedDialRows(value: Int) = DialSettings.setSpeedDialRows(value)
 

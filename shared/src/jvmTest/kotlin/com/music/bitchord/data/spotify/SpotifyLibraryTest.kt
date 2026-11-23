@@ -225,4 +225,45 @@ class SpotifyLibraryTest {
         assertEquals("Publisher of Show One", shows.first().publisher)
         assertEquals(emptyList(), parseSearchShows(json.parseToJsonElement("""{"data":{"searchV2":{}}}""").jsonObject))
     }
+
+    @Test
+    fun topContentReadsTheProfileListsInOrder() {
+        val root = json.parseToJsonElement(
+            """
+            {"data":{"me":{"profile":{
+              "topTracks":{"totalCount":3,"items":[
+                {"data":{"__typename":"Track","uri":"spotify:track:t1","name":"Midnight City",
+                  "artists":{"items":[{"profile":{"name":"M83"}}]},
+                  "albumOfTrack":{"name":"Hurry Up, We're Dreaming","coverArt":{"sources":[
+                    {"url":"https://img/t1/640","width":640},{"url":"https://img/t1/64","width":64}]}},
+                  "duration":{"totalMilliseconds":243000}}},
+                {"data":{"__typename":"Track","uri":"spotify:episode:e1","name":"Not a song"}},
+                {"data":{"__typename":"Track","uri":"spotify:track:t2","name":"Say My Name",
+                  "artists":{"items":[{"profile":{"name":"ODESZA"}},{"profile":{"name":"Zyra"}}]}}}
+              ]},
+              "topArtists":{"totalCount":2,"items":[
+                {"data":{"uri":"spotify:artist:a1","profile":{"name":"Kasbo"},
+                  "visuals":{"avatarImage":{"sources":[{"url":"https://img/a1/160","width":160},{"url":"https://img/a1/640","width":640}]}}}},
+                {"data":{"uri":"spotify:artist:a2","profile":{"name":""}}}
+              ]}
+            }}}}
+            """.trimIndent(),
+        ).jsonObject
+        val top = parseTopContent(root)
+        assertEquals(listOf("t1", "t2"), top.tracks.map { it.id })
+        assertEquals("M83", top.tracks.first().artist)
+        assertEquals("ODESZA, Zyra", top.tracks[1].artist)
+        assertEquals("https://img/t1/640", top.tracks.first().imageUrl)
+        assertEquals(243000, top.tracks.first().durationMs)
+        assertEquals(listOf("a1"), top.artists.map { it.id })
+        assertEquals("https://img/a1/640", top.artists.first().imageUrl)
+    }
+
+    @Test
+    fun topContentWithNeitherListFails() {
+        val root = json.parseToJsonElement("""{"data":{"me":{"profile":{}}}}""").jsonObject
+        kotlin.test.assertFailsWith<IllegalStateException> { parseTopContent(root) }
+        val one = json.parseToJsonElement("""{"data":{"me":{"profile":{"topArtists":{"items":[]}}}}}""").jsonObject
+        assertEquals(SpotifyTopContent(emptyList(), emptyList()), parseTopContent(one))
+    }
 }
