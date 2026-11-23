@@ -19,11 +19,13 @@ class AccountPlanTest {
         ).jsonObject
     }
 
-    private val video = 137 to "video/mp4; codecs=\"avc1.640028\""
-    private val aac128 = 140 to "audio/mp4; codecs=\"mp4a.40.2\""
-    private val aac256 = 141 to "audio/mp4; codecs=\"mp4a.40.2\""
-    private val opus160 = 251 to "audio/webm; codecs=\"opus\""
-    private val opus256 = 774 to "audio/webm; codecs=\"opus\""
+    // The real mime types also carry `; codecs="..."`; the quotes are left out here so the
+    // fixture needs no escapes. Only the "audio/" start is read.
+    private val video = 137 to "video/mp4"
+    private val aac128 = 140 to "audio/mp4"
+    private val aac256 = 141 to "audio/mp4"
+    private val opus160 = 251 to "audio/webm"
+    private val opus256 = 774 to "audio/webm"
 
     @Test
     fun `the 256 kbps formats mean Premium`() {
