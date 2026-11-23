@@ -273,6 +273,9 @@
     <string name="high_performance_battery_needed">Dial की बैटरी उपयोग सेटिंग को “अप्रतिबंधित” पर सेट करें। सेटिंग खोलने के लिए यहां टैप करें।</string>
     <string name="disable_haptics">हैप्टिक्स बंद करें</string>
     <string name="disable_haptics_subtitle">Dial में सभी वाइब्रेशन फ़ीडबैक बंद करता है</string>
+    <string name="hide_ai_music">AI संगीत छिपाएँ</string>
+    <string name="hide_ai_music_subtitle" formatted="false">जाने-माने AI कलाकारों के गाने खोज, होम, मिक्स और रेडियो से हटाता है। यह फ़िल्टर 100% प्रभावी नहीं है।</string>
+    <string name="hide_ai_music_sources">सूचियाँ: Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist. Dial दिन में एक बार सूचियाँ अपडेट करता है।</string>
     <string name="static_background">स्थिर बैकग्राउंड रंग</string>
     <string name="static_background_subtitle">ऐप के पेजों के पीछे के रंगों की हलचल रोकता है</string>
     <string name="enable">चालू करें</string>

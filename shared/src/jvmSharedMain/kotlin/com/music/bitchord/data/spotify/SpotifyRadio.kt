@@ -29,8 +29,11 @@ object SpotifyRadio {
 
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
-    /** A track a station named. [title] and [artist] are blank when the answer carried only its id. */
-    data class Pick(val id: String, val title: String, val artist: String) {
+    /**
+     * A track a station named. [title] and [artist] are blank when the answer carried only its id.
+     * [artistIds] are the Spotify ids of its artists, where the answer gives them ("Hide AI music").
+     */
+    data class Pick(val id: String, val title: String, val artist: String, val artistIds: List<String> = emptyList()) {
         val named: Boolean get() = title.isNotBlank() && artist.isNotBlank()
     }
 
@@ -64,19 +67,26 @@ object SpotifyRadio {
             ?: return null
         val metadata = track["metadata"] as? JsonObject
         val title = track.text("name") ?: metadata?.text("title")
-        val artists = (track["artists"] as? JsonArray)
-            ?.mapNotNull { (it as? JsonObject)?.text("name") }
-            ?.joinToString(", ")
-            ?.takeIf { it.isNotBlank() }
+        val artistList = (track["artists"] as? JsonArray)?.mapNotNull { it as? JsonObject }.orEmpty()
+        val artists = artistList
+            .mapNotNull { it.text("name") }
+            .joinToString(", ")
+            .takeIf { it.isNotBlank() }
             ?: track.text("artistName")
             ?: metadata?.text("artist_name")
-        return Pick(id, title.orEmpty(), artists.orEmpty())
+        val artistIds = artistList.mapNotNull { artist ->
+            artist.text("uri")?.removePrefix("spotify:artist:")?.takeIf { ':' !in it && it.isNotBlank() }
+                ?: artist.text("id")?.takeIf { it.isNotBlank() }
+        }
+        return Pick(id, title.orEmpty(), artists.orEmpty(), artistIds)
     }
 
     /** [picks] with the names [named] has for them filled in; what still has none is dropped. */
     fun withNames(picks: List<Pick>, named: List<Pick>): List<Pick> {
         val byId = named.filter { it.named }.associateBy { it.id }
-        return picks.mapNotNull { pick -> if (pick.named) pick else byId[pick.id] }
+        return picks.mapNotNull { pick ->
+            if (pick.named) pick else byId[pick.id]?.let { found -> found.copy(artistIds = found.artistIds.ifEmpty { pick.artistIds }) }
+        }
     }
 
     /**

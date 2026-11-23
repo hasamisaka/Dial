@@ -2,6 +2,7 @@ package com.music.bitchord.data.spotify
 
 import com.music.bitchord.data.DebugLog as Log
 import com.music.bitchord.data.YtMusicRepository
+import com.music.bitchord.data.aimusic.AiMusicFilter
 import com.music.bitchord.data.canvas.SpotifyToken
 import com.music.bitchord.data.canvas.canvasGetWithStatus
 import com.music.bitchord.data.model.SearchFilter
@@ -117,7 +118,9 @@ object SpotifyRecommendations {
             val picks = fetch(SpotifyRadio.stationUrl(seed, limit), headers, "station")
                 .ifEmpty { fetch(SpotifyRadio.recommendationsUrl(seed, limit), headers, "recommendations") }
                 .filterNot { it.id == seed }
-            named(picks, headers).also { Log.d(TAG, "${it.size} Spotify picks after '$title'") }
+            // "Hide AI music": a pick by a listed AI act is not looked for on YouTube Music at all.
+            named(picks, headers).filterNot { AiMusicFilter.anyAiSpotifyArtist(it.artistIds) }
+                .also { Log.d(TAG, "${it.size} Spotify picks after '$title'") }
         }
     }
 

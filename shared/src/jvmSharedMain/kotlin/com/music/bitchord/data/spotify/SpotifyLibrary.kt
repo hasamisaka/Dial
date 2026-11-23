@@ -1,5 +1,6 @@
 package com.music.bitchord.data.spotify
 
+import com.music.bitchord.data.aimusic.AiMusicFilter
 import com.music.bitchord.data.Http
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -46,6 +47,8 @@ data class SpotifyTrack(
     val album: String?,
     val durationMs: Int,
     val imageUrl: String?,
+    /** The Spotify ids of its artists, where the answer gives them ("Hide AI music"). */
+    val artistIds: List<String> = emptyList(),
 )
 
 /** An artist hit of a Spotify search. */
@@ -265,7 +268,7 @@ object SpotifyLibrary {
             put("includeLocalConcertsField", false)
             put("includeAuthors", false)
         }
-        parseSearch(gql("searchDesktop", SEARCH, variables, authHeaders()))
+        parseSearch(gql("searchDesktop", SEARCH, variables, authHeaders())).withoutAiMusic()
     }
 
     /**
@@ -549,8 +552,27 @@ internal fun parseSearchTracks(root: JsonObject): List<SpotifyTrack> {
             album = album?.str("name"),
             durationMs = data.obj("duration")?.int("totalMilliseconds") ?: 0,
             imageUrl = album?.obj("coverArt")?.arr("sources")?.lastUrl(),
+            artistIds = data.obj("artists")?.arr("items").orEmpty().mapNotNull { artist ->
+                artist.jsonObject.str("uri")?.takeIf { it.startsWith("spotify:artist:") }?.substringAfterLast(":")
+            },
         )
     }
+}
+
+/**
+ * "Hide AI music" on a Spotify search: the songs and artist hits of listed AI
+ * acts go. The top hit is dropped with them when it was one of those.
+ */
+internal fun SpotifySearch.withoutAiMusic(): SpotifySearch {
+    if (!AiMusicFilter.active) return this
+    val keptTracks = tracks.filterNot { AiMusicFilter.anyAiSpotifyArtist(it.artistIds) }
+    val keptArtists = artists.filterNot { AiMusicFilter.isAiSpotifyArtist(it.id) }
+    if (keptTracks.size == tracks.size && keptArtists.size == artists.size) return this
+    val keptUris = keptTracks.map { "spotify:track:${it.id}" } + keptArtists.map { "spotify:artist:${it.id}" }
+    val top = topUri?.takeUnless {
+        (it.startsWith("spotify:track:") || it.startsWith("spotify:artist:")) && it !in keptUris
+    }
+    return copy(tracks = keptTracks, artists = keptArtists, topUri = top)
 }
 
 /**

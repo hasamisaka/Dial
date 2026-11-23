@@ -445,6 +445,12 @@ data class ShelfItem(
     val durationText: String? = null,
     /** A podcast episode, by the type its play action states. Not kept when the card is saved. */
     val isPodcastEpisode: Boolean = false,
+    /**
+     * The channels of the artists the card credits, where its subtitle links
+     * them; an artist card's own channel is its [browseId]. Read by "Hide AI
+     * music". Not kept when the card is saved.
+     */
+    val artistIds: List<String> = emptyList(),
 )
 
 /** What the browse id of a podcast show's page starts with. */

@@ -274,6 +274,9 @@
     <string name="high_performance_battery_needed">Réglez l\'utilisation de la batterie de Dial sur Illimitée. Touchez ici pour ouvrir les paramètres.</string>
     <string name="disable_haptics">Désactiver le retour haptique</string>
     <string name="disable_haptics_subtitle">Arrête toutes les vibrations dans Dial</string>
+    <string name="hide_ai_music">Masquer la musique IA</string>
+    <string name="hide_ai_music_subtitle" formatted="false">Retire les titres des artistes IA connus de la recherche, de l\'accueil, des mix et de la radio. Ce filtre n\'est pas efficace à 100 %.</string>
+    <string name="hide_ai_music_sources">Listes : Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist. Dial met à jour les listes une fois par jour.</string>
     <string name="static_background">Couleurs d\'arrière-plan statiques</string>
     <string name="static_background_subtitle">Arrête le mouvement des couleurs derrière les pages de l\'appli</string>
     <string name="enable">Activer</string>

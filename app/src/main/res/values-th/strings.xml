@@ -307,6 +307,9 @@
     <string name="high_performance_battery_needed">ตั้งค่าการใช้แบตเตอรี่ของ Dial เป็นไม่จำกัด แตะที่นี่เพื่อเปิดการตั้งค่า</string>
     <string name="disable_haptics">ปิดการสั่นตอบสนอง</string>
     <string name="disable_haptics_subtitle">หยุดการสั่นตอบสนองทั้งหมดใน Dial</string>
+    <string name="hide_ai_music">ซ่อนเพลง AI</string>
+    <string name="hide_ai_music_subtitle" formatted="false">นำเพลงของศิลปิน AI ที่รู้จักออกจากการค้นหา หน้าแรก มิกซ์ และวิทยุ ตัวกรองนี้ไม่ได้มีประสิทธิภาพ 100%</string>
+    <string name="hide_ai_music_sources">รายการ: Soul Over AI (CC BY 4.0), Spotify AI Blocker, aimusic-blocklist Dial อัปเดตรายการวันละครั้ง</string>
     <string name="static_background">สีพื้นหลังแบบนิ่ง</string>
     <string name="static_background_subtitle">หยุดการเคลื่อนไหวของสีด้านหลังหน้าต่าง ๆ ของแอป</string>
     <string name="enable">เปิดใช้งาน</string>
