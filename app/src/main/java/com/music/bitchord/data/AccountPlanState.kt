@@ -1,13 +1,12 @@
 package com.music.bitchord.data
 
 import com.music.bitchord.data.DebugLog as Log
-import com.music.bitchord.data.canvas.CANVAS_UA
 import com.music.bitchord.data.canvas.SpotifyCanvasQuery
 import com.music.bitchord.data.canvas.SpotifyToken
-import com.music.bitchord.data.canvas.canvasGet
 import com.music.bitchord.data.canvas.canvasGetWithStatus
 import com.music.bitchord.data.spotify.SpotifyLikeSync
 import com.music.bitchord.data.spotify.SpotifyPlayedList
+import com.music.bitchord.data.spotify.SpotifyQueryHashes
 import android.content.Context
 import android.content.SharedPreferences
 import com.music.bitchord.data.innertube.StreamResolver
@@ -170,11 +169,6 @@ object AccountPlanState {
 
     private val jsonType = "application/json".toMediaType()
 
-    private val accountHash = SpotifyCanvasQuery.QueryHashes(
-        fetch = { url -> canvasGet(url, mapOf("User-Agent" to CANVAS_UA)) },
-        operation = AccountPlans.SPOTIFY_ACCOUNT_OPERATION,
-        fallback = AccountPlans.SPOTIFY_KNOWN_ACCOUNT_HASH,
-    )
 
     /**
      * The web player's own way first: the `accountAttributes` query it asks for its plan. The
@@ -192,7 +186,7 @@ object AccountPlanState {
 
     private fun spotifyViaWeb(headers: Map<String, String>, isRetry: Boolean = false): AccountPlan {
         if ("Client-Token" !in headers) return AccountPlan.UNKNOWN
-        val hash = accountHash.hash(forceRefresh = isRetry)
+        val hash = SpotifyQueryHashes.hash(SpotifyQueryHashes.ACCOUNT_ATTRIBUTES, forceRefresh = isRetry)
         val query = SpotifyPlayedList.queryBody(AccountPlans.SPOTIFY_ACCOUNT_OPERATION, hash)
         val request = Request.Builder()
             .url(SpotifyCanvasQuery.ENDPOINT)

@@ -50,6 +50,7 @@ object SpotifyQueryHashes {
     const val ADD_TO_PLAYLIST = "addToPlaylist"
     const val REMOVE_FROM_PLAYLIST = "removeFromPlaylist"
     const val PROFILE_ATTRIBUTES = "profileAttributes"
+    const val ACCOUNT_ATTRIBUTES = "accountAttributes"
 
     /**
      * The last hashes known to work, read from web player 1.3.12.512 on 2026-11-22. Dial uses
@@ -70,6 +71,8 @@ object SpotifyQueryHashes {
         ADD_TO_PLAYLIST to "b907ad6b088d5bf7680fa81198996d58398c2d55dfcdf59fcc959e0be98a418a",
         REMOVE_FROM_PLAYLIST to "b907ad6b088d5bf7680fa81198996d58398c2d55dfcdf59fcc959e0be98a418a",
         PROFILE_ATTRIBUTES to "08ffb4730af3746e04a8301396f20875dbbce10c75243803091a9274eacc8ac0",
+        // Read on 2026-11-23, a later web player build than the others.
+        ACCOUNT_ATTRIBUTES to "be4ce359daee01463ddb8e77536220e108e3d28105e12199f244d7a5954e9d14",
     )
 
     /** Where the found hashes are kept between launches. Set by each app at start-up; null keeps them in memory only. */
