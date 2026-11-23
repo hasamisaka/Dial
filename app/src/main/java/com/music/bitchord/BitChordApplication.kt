@@ -201,6 +201,8 @@ class BitChordApplication : Application(), SingletonImageLoader.Factory, Configu
         // Spotify's own lyrics, asked with the same sign-in; see SpotifyLyrics.
         com.music.bitchord.data.spotify.SpotifyAccountLyrics.install()
         com.music.bitchord.data.spotify.SpotifyPlayedSync.init(this)
+        // After AppSettings: it follows the Spotify sign-in, and the plans it keeps show at once.
+        com.music.bitchord.data.AccountPlanState.init(this)
         // A sideloaded update is just a new APK over the old one, so app data —
         // including whatever the old build left in the image cache — survives
         // it untouched. Wipe that on the first launch of a higher versionCode so

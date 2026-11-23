@@ -93,6 +93,8 @@
     <string name="testing">テスト中…</string>
     <string name="connected">接続済み</string>
     <string name="account_integrations">アカウントと連携</string>
+    <string name="youtube_premium_audio">高音質オーディオ</string>
+    <string name="youtube_premium_audio_subtitle">標準の160 kbpsではなく256 kbpsのOpus音声をストリーミング</string>
     <string name="account_scrobbling">アカウントとスクロブリング</string>
     <string name="rich_presence">リッチプレゼンス</string>
     <string name="scrobbling">スクロブリング</string>
@@ -1499,4 +1501,8 @@
     <string name="spotify_dial_seeds">Spotify のおすすめの元</string>
     <string name="spotify_dial_seeds_plays">Dial での再生</string>
     <string name="spotify_dial_seeds_top">Spotify のトップ</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">無料</string>
+    <string name="youtube_premium_audio_needs_premium">YouTube Music Premium専用</string>
+    <string name="youtube_music">YouTube Music</string>
 </resources>

@@ -108,6 +108,8 @@
     <string name="testing">Проверка…</string>
     <string name="connected">Подключено</string>
     <string name="account_integrations">Аккаунт и интеграции</string>
+    <string name="youtube_premium_audio">Высокое качество звука</string>
+    <string name="youtube_premium_audio_subtitle">Воспроизводить звук Opus 256 кбит/с вместо обычных 160 кбит/с</string>
     <string name="account_scrobbling">Аккаунт и скробблинг</string>
     <string name="rich_presence">Rich Presence</string>
     <string name="scrobbling">Скробблинг</string>
@@ -1553,4 +1555,8 @@
     <string name="spotify_dial_seeds">Подборка Spotify на основе</string>
     <string name="spotify_dial_seeds_plays">Прослушивания в Dial</string>
     <string name="spotify_dial_seeds_top">Топ Spotify</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">Бесплатный</string>
+    <string name="youtube_premium_audio_needs_premium">Только с YouTube Music Premium</string>
+    <string name="youtube_music">YouTube Music</string>
 </resources>

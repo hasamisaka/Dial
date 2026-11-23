@@ -102,6 +102,8 @@
     <string name="testing">Test ediliyor…</string>
     <string name="connected">Bağlandı</string>
     <string name="account_integrations">Hesap ve entegrasyonlar</string>
+    <string name="youtube_premium_audio">Yüksek kaliteli ses</string>
+    <string name="youtube_premium_audio_subtitle">Standart 160 kbps yerine 256 kbps Opus sesi çal</string>
     <string name="account_scrobbling">Hesap ve scrobbling</string>
     <string name="rich_presence">Zengin varlık</string>
     <string name="scrobbling">Scrobbling</string>
@@ -1478,4 +1480,8 @@
     <string name="spotify_dial_seeds">Spotify önerilerinin kaynağı</string>
     <string name="spotify_dial_seeds_plays">Dial\'daki dinlemeler</string>
     <string name="spotify_dial_seeds_top">Spotify Top</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">Ücretsiz</string>
+    <string name="youtube_premium_audio_needs_premium">Yalnızca YouTube Music Premium ile</string>
+    <string name="youtube_music">YouTube Music</string>
 </resources>

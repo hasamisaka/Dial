@@ -93,6 +93,8 @@
     <string name="testing">測試中…</string>
     <string name="connected">已連線</string>
     <string name="account_integrations">賬號與整合</string>
+    <string name="youtube_premium_audio">高音質</string>
+    <string name="youtube_premium_audio_subtitle">串流 256 kbps Opus 音訊，而非標準的 160 kbps</string>
     <string name="account_scrobbling">賬號與Scrobbling</string>
     <string name="rich_presence">Rich Presence</string>
     <string name="scrobbling">Scrobbling</string>
@@ -1500,4 +1502,8 @@
     <string name="spotify_dial_seeds">Spotify 推薦依據</string>
     <string name="spotify_dial_seeds_plays">Dial 中的播放</string>
     <string name="spotify_dial_seeds_top">Spotify 常聽</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">免費</string>
+    <string name="youtube_premium_audio_needs_premium">只限 YouTube Music Premium</string>
+    <string name="youtube_music">YouTube Music</string>
 </resources>

@@ -4,6 +4,7 @@ import com.music.bitchord.data.DebugLog as Log
 import com.music.bitchord.data.aimusic.AiMusicFilter
 import com.music.bitchord.data.innertube.Innertube
 import com.music.bitchord.data.innertube.InnertubeParser
+import com.music.bitchord.data.innertube.StreamResolver
 import com.music.bitchord.data.model.Account
 import com.music.bitchord.data.model.AccountChannel
 import com.music.bitchord.data.model.isExactArtistMatch
@@ -703,6 +704,30 @@ object YtMusicRepository {
     suspend fun account(): Result<Account> = call("account") {
         InnertubeParser.parseAccount(Innertube.accountMenu())
             ?: error("No account details")
+    }
+
+    /**
+     * Whether the signed-in Google account has YouTube Music Premium, for the account settings.
+     *
+     * Asks the signed-in player about a song and looks at the audio formats it offers: only a
+     * Premium session is offered the 256 kbps ones ([AccountPlans.YOUTUBE_PREMIUM_ITAGS]).
+     * [AccountPlan.UNKNOWN] when signed out, when no probe song plays, or when a request fails.
+     * Never an error: nothing waits for this answer.
+     */
+    suspend fun youtubePlan(): AccountPlan {
+        if (Innertube.cookie == null) return AccountPlan.UNKNOWN
+        for (videoId in AccountPlans.YOUTUBE_PROBE_VIDEOS) {
+            val plan = runCatching {
+                val sts = StreamResolver.signatureTimestamp(videoId)
+                Innertube.signedInPlayer(videoId, sts)?.let(AccountPlans::youtubeFromPlayer)
+            }.onFailure {
+                if (it is CancellationException) throw it
+                Log.w(TAG, "plan check for $videoId failed: ${it.message}")
+            }
+                .getOrNull() ?: AccountPlan.UNKNOWN
+            if (plan != AccountPlan.UNKNOWN) return plan
+        }
+        return AccountPlan.UNKNOWN
     }
 
     /**

@@ -192,6 +192,8 @@ import com.music.bitchord.ui.icons.BitChordIcons
 import com.music.bitchord.ui.performance.resolvePerformanceRefreshRate
 import com.music.bitchord.ui.performance.supportedPerformanceRefreshRates
 import com.music.bitchord.data.model.Account
+import com.music.bitchord.data.AccountPlan
+import com.music.bitchord.ui.components.PlanBadge
 import com.music.bitchord.data.LocalMediaRepository
 import com.music.bitchord.data.NerdStats
 import com.music.bitchord.data.scrobbling.LastFM
@@ -2752,6 +2754,8 @@ internal fun AccountCard(
     onClick: (() -> Unit)? = null,
     /** Sits inside a [SettingsGroup] that already supplies the card, so draws none of its own. */
     grouped: Boolean = false,
+    /** The account's plan, shown as a [PlanBadge] after the name; nothing when null. */
+    plan: AccountPlan? = null,
 ) {
     Row(
         modifier = Modifier
@@ -2800,14 +2804,18 @@ internal fun AccountCard(
         }
         Spacer(Modifier.width(14.dp))
         Column(Modifier.weight(1f)) {
-            Text(
-                text = account?.name
-                    ?: stringResource(if (signedIn) R.string.signed_in else R.string.not_signed_in),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = account?.name
+                        ?: stringResource(if (signedIn) R.string.signed_in else R.string.not_signed_in),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                if (signedIn) PlanBadge(plan, Modifier.padding(start = 10.dp))
+            }
             Spacer(Modifier.height(2.dp))
             Text(
                 text = account?.email?.takeIf { it.isNotBlank() }
@@ -3820,6 +3828,8 @@ internal fun SettingsRow(
     trailing: (@Composable () -> Unit)? = null,
     /** Red title and glyph, for a row that logs out or disconnects — see [destructiveRed]. */
     danger: Boolean = false,
+    /** Drawn after the title on its line, such as the account plan's [PlanBadge]. */
+    titleBadge: (@Composable () -> Unit)? = null,
 ) {
     val ink = if (danger) destructiveRed() else MaterialTheme.colorScheme.onBackground
     Row(
@@ -3859,6 +3869,10 @@ internal fun SettingsRow(
                 if (badge != null) {
                     Spacer(Modifier.width(8.dp))
                     Badge(badge)
+                }
+                if (titleBadge != null) {
+                    Spacer(Modifier.width(8.dp))
+                    titleBadge()
                 }
             }
             if (subtitleContent != null) {

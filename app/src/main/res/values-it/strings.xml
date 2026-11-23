@@ -120,6 +120,8 @@
     <string name="testing">Test in corso…</string>
     <string name="connected">Connesso</string>
     <string name="account_integrations">Account e integrazioni</string>
+    <string name="youtube_premium_audio">Audio di alta qualità</string>
+    <string name="youtube_premium_audio_subtitle">Riproduci l\'audio Opus a 256 kbps invece dei 160 kbps standard</string>
     <string name="account_scrobbling">Account e scrobbling</string>
     <string name="rich_presence">Presenza avanzata</string>
     <string name="scrobbling">Scrobbling</string>
@@ -1460,4 +1462,8 @@
     <string name="spotify_dial_seeds">Suggerimenti Spotify da</string>
     <string name="spotify_dial_seeds_plays">Ascolti in Dial</string>
     <string name="spotify_dial_seeds_top">Top Spotify</string>
+    <string name="account_plan_premium">Premium</string>
+    <string name="account_plan_free">Gratuito</string>
+    <string name="youtube_premium_audio_needs_premium">Solo con YouTube Music Premium</string>
+    <string name="youtube_music">YouTube Music</string>
 </resources>
