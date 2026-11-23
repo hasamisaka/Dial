@@ -1,6 +1,7 @@
 package com.music.bitchord.desktop
 
 import com.music.bitchord.data.canvas.SpotifyCanvasQuery
+import com.music.bitchord.data.spotify.SpotifyQueryHashes
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -124,9 +125,6 @@ internal object DesktopSpotifyCanvas {
 
     // ── Pathfinder: the `canvas` GraphQL query ───────────────────────────
 
-    /** The live `canvas` query hash, read off the web player's own scripts. */
-    private val queryHashes = SpotifyCanvasQuery.QueryHashes(fetch = { url -> canvasGet(url) })
-
     /** The track's canvas, asked for the way the current web player does; `canvaz-cache` is the
      * fallback when the query fails or answers with nothing playable. */
     private fun fetchCanvasUrl(trackUri: String, token: String): String? =
@@ -143,7 +141,7 @@ internal object DesktopSpotifyCanvas {
         }
 
     private fun fetchCanvasViaPathfinder(trackUri: String, token: String, isRetry: Boolean = false): SpotifyCanvasQuery.Answer {
-        val hash = queryHashes.canvasHash(forceRefresh = isRetry)
+        val hash = SpotifyQueryHashes.hash(SpotifyQueryHashes.CANVAS, forceRefresh = isRetry)
         val response = runCatching {
             val builder = HttpRequest.newBuilder(URI.create(SpotifyCanvasQuery.ENDPOINT))
                 .timeout(Duration.ofSeconds(15))

@@ -104,20 +104,17 @@ object SpotifyLibrary {
     var auth: Auth? = null
 
     private const val GQL = "https://api-partner.spotify.com/pathfinder/v2/query"
-    private const val LIBRARY = "973e511ca44261fda7eebac8b653155e7caee3675abb4fb110cc1b8c78b091c3"
-    private const val PLAYLIST = "346811f856fb0b7e4f6c59f8ebea78dd081c6e2fb01b77c954b26259d5fc6763"
     /** The pseudo-playlist id for the Liked Songs collection, which has no playlist uri. */
     const val LIKED_ID = "liked"
     /** Spotify's own Liked Songs artwork, the purple heart; the collection has no cover of its own. */
     private const val LIKED_COVER = "https://misc.scdn.co/liked-songs/liked-songs-640.png"
-    private const val LIKED = "087278b20b743578a6262c2b0b4bcd20d879c503cc359a2285baf083ef944240"
-    /** The web player's own search page query, the one Meld reads Spotify's catalogue through. */
-    private const val SEARCH = "4801118d4a100f756e833d33984436a3899cff359c532f8fd3aaf174b60b3b49"
     /**
-     * The web player's home page query, newest first: Spotify retires these
-     * hashes now and then, so an older one is tried when the newest is refused.
+     * The web player's home page query: the live hash first (null here), then older hashes,
+     * newest first. Spotify retires these hashes now and then, so an older one is tried when
+     * the newer one is refused.
      */
-    private val HOME = listOf(
+    private val HOME_HASHES = listOf(
+        null,
         "5fb7da7a03ee2776c0670856609cb85a189a3cecc36cc160b91cde79063b9cf1",
         "23e37f2e58d82d567f27080101d36609009d8c3676457b1086cb0acc55b72a5d",
     )
@@ -125,15 +122,13 @@ object SpotifyLibrary {
      * The profile page's top songs and artists query, newest first. The first
      * is the web player's (read off its requests on 2026-10-21, as listed by
      * the Spotifly client), the second the desktop app's. This operation is
-     * not named in the web player's first scripts, so it can't be looked up
-     * there the way the Canvas query is.
+     * not named in the web player's first scripts, so it is not in
+     * [SpotifyQueryHashes] and these fixed hashes are sent.
      */
     private val TOP_CONTENT = listOf(
         "61b7353d3625780022dbc63d459eb64cd609e7e5e2a820f9160d65030efe2e15",
         "49ee15704de4a7fdeac65a02db20604aa11e46f02e809c55d9a89f6db9754356",
     )
-    /** One shelf of the home page on its own, for when the whole page can't be read. */
-    private const val HOME_SECTION = "eb3fba2d388cf4fc4d696b1757a58584e9538a3b515ea742e9cc9465807340be"
     /** Home's "Your top mixes" shelf: the same uri for every account. */
     internal const val TOP_MIXES_SECTION = "spotify:section:0JQ5DAnM3wGh0gz1MXnu89"
     /** The phone's canvas client sent this one; kept so its requests look unchanged. */
@@ -172,8 +167,8 @@ object SpotifyLibrary {
             put("sectionItemsLimit", 20)
             put("includeEpisodeContentRatingsV2", false)
         }
-        val fromHome = HOME.firstNotNullOfOrNull { hash ->
-            runCatching { parseHomeTopMixes(gql("home", hash, homeVariables, headers)) }
+        val fromHome = HOME_HASHES.firstNotNullOfOrNull { hash ->
+            runCatching { parseHomeTopMixes(gql(SpotifyQueryHashes.HOME, homeVariables, headers, hash)) }
                 .getOrNull()?.takeIf { it.isNotEmpty() }
         }
         fromHome ?: run {
@@ -190,7 +185,7 @@ object SpotifyLibrary {
                 put("sectionItemsLimit", 20)
                 put("sectionItemsOffset", 0)
             }
-            parseHomeSectionPlaylists(gql("homeSection", HOME_SECTION, variables, headers))
+            parseHomeSectionPlaylists(gql(SpotifyQueryHashes.HOME_SECTION, variables, headers))
         }
     }
 
@@ -216,7 +211,7 @@ object SpotifyLibrary {
         var failure: Exception? = null
         for (hash in TOP_CONTENT) {
             try {
-                return@withContext parseTopContent(gql("userTopContent", hash, variables, headers))
+                return@withContext parseTopContent(gql("userTopContent", variables, headers, hash))
             } catch (cancelled: kotlinx.coroutines.CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
@@ -242,8 +237,8 @@ object SpotifyLibrary {
             put("sectionItemsLimit", 20)
             put("includeEpisodeContentRatingsV2", false)
         }
-        HOME.firstNotNullOfOrNull { hash ->
-            runCatching { parseHomeShows(gql("home", hash, variables, headers)) }
+        HOME_HASHES.firstNotNullOfOrNull { hash ->
+            runCatching { parseHomeShows(gql(SpotifyQueryHashes.HOME, variables, headers, hash)) }
                 .getOrNull()?.takeIf { it.isNotEmpty() }
         }.orEmpty()
     }
@@ -265,7 +260,7 @@ object SpotifyLibrary {
                 put("limit", limit)
                 put("enableWatchFeedEntrypoint", false)
             }
-            parsePlaylistHead(gql("fetchPlaylist", PLAYLIST, variables, authHeaders()))
+            parsePlaylistHead(gql(SpotifyQueryHashes.FETCH_PLAYLIST, variables, authHeaders()))
         }
 
     private suspend fun libraryPlaylists(): List<SpotifyPlaylist> {
@@ -329,7 +324,7 @@ object SpotifyLibrary {
             put("includeLocalConcertsField", false)
             put("includeAuthors", false)
         }
-        parseSearch(gql("searchDesktop", SEARCH, variables, authHeaders()))
+        parseSearch(gql(SpotifyQueryHashes.SEARCH_DESKTOP, variables, authHeaders()))
     }
 
     /**
@@ -348,7 +343,7 @@ object SpotifyLibrary {
             put("includeLocalConcertsField", false)
             put("includeAuthors", false)
         }
-        parseSearchShows(gql("searchDesktop", SEARCH, variables, authHeaders()))
+        parseSearchShows(gql(SpotifyQueryHashes.SEARCH_DESKTOP, variables, authHeaders()))
     }
 
     private fun playlistPage(headers: Map<String, String>, offset: Int): Triple<List<SpotifyPlaylist>, Int, Int> {
@@ -369,7 +364,7 @@ object SpotifyLibrary {
             put("folderUri", null as String?)
             put("includeFoldersWhenFlattening", false)
         }
-        return parsePlaylistPage(gql("libraryV3", LIBRARY, variables, headers))
+        return parsePlaylistPage(gql(SpotifyQueryHashes.LIBRARY, variables, headers))
     }
 
     private fun trackPage(
@@ -383,7 +378,7 @@ object SpotifyLibrary {
             put("limit", 100)
             put("enableWatchFeedEntrypoint", false)
         }
-        return parseTrackPage(gql("fetchPlaylist", PLAYLIST, variables, headers))
+        return parseTrackPage(gql(SpotifyQueryHashes.FETCH_PLAYLIST, variables, headers))
     }
 
     /**
@@ -399,7 +394,7 @@ object SpotifyLibrary {
             put("limit", 1)
             put("enableWatchFeedEntrypoint", false)
         }
-        val root = gql("fetchPlaylist", PLAYLIST, variables, authHeaders())
+        val root = gql(SpotifyQueryHashes.FETCH_PLAYLIST, variables, authHeaders())
         largestSource(root.obj("data")?.obj("playlistV2")?.obj("images"))
     }
 
@@ -408,7 +403,7 @@ object SpotifyLibrary {
             put("offset", offset)
             put("limit", 100)
         }
-        return parseLikedPage(gql("fetchLibraryTracks", LIKED, variables, headers))
+        return parseLikedPage(gql(SpotifyQueryHashes.LIKED_TRACKS, variables, headers))
     }
 
     private suspend fun authHeaders(): Map<String, String> {
@@ -425,7 +420,32 @@ object SpotifyLibrary {
         }
     }
 
-    private fun gql(operation: String, hash: String, variables: JsonObject, headers: Map<String, String>): JsonObject {
+    /**
+     * Sends a Pathfinder [operation]. With no [hash] given, the live hash from
+     * [SpotifyQueryHashes] is used; when Spotify does not know it, the web player is read
+     * again and the operation is sent once more with the new hash.
+     */
+    private fun gql(
+        operation: String,
+        variables: JsonObject,
+        headers: Map<String, String>,
+        hash: String? = null,
+    ): JsonObject {
+        if (hash != null) return send(operation, hash, variables, headers)
+        val first = SpotifyQueryHashes.hash(operation)
+        return try {
+            send(operation, first, variables, headers)
+        } catch (stale: StaleHashException) {
+            val fresh = SpotifyQueryHashes.hash(operation, forceRefresh = true)
+            if (fresh == first) throw IllegalStateException(stale.message)
+            send(operation, fresh, variables, headers)
+        }
+    }
+
+    private class StaleHashException(operation: String) :
+        IllegalStateException("Spotify $operation: PersistedQueryNotFound")
+
+    private fun send(operation: String, hash: String, variables: JsonObject, headers: Map<String, String>): JsonObject {
         val body = buildJsonObject {
             put("variables", variables)
             put("operationName", operation)
@@ -443,6 +463,7 @@ object SpotifyLibrary {
             .build()
         val text = Http.client.newCall(request).execute().use { response ->
             val payload = response.body?.string().orEmpty()
+            if (SpotifyQueryHashes.isStale(payload)) throw StaleHashException(operation)
             if (!response.isSuccessful) {
                 throw IllegalStateException("Spotify $operation failed (${response.code})")
             }

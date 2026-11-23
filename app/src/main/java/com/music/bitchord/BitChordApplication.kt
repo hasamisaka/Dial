@@ -94,6 +94,8 @@ class BitChordApplication : Application(), SingletonImageLoader.Factory, Configu
         com.music.bitchord.data.ContentCountry.chosen = { AppSettings.contentCountry.value }
         migrateScriptOnlyAppLocale()
         LyricsTranslation.cacheDir = cacheDir
+        // The Spotify web player's query hashes are kept here until the web player changes.
+        com.music.bitchord.data.spotify.SpotifyQueryHashes.cacheDir = cacheDir
         // PlaybackService shares this process, so seeding the cookie here means
         // stream resolution is authenticated from the first play onwards.
         authStore = AuthStore(this)

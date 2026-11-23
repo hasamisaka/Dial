@@ -25,16 +25,9 @@ import kotlinx.serialization.json.putJsonObject
  */
 object SpotifyLikeMirror {
 
-    const val ADD_OPERATION = "addToLibrary"
-    const val REMOVE_OPERATION = "removeFromLibrary"
-
-    /**
-     * The last hashes known for the two mutations. The live ones are read off
-     * the web player's scripts first (see `SpotifyCanvasQuery.QueryHashes`);
-     * these only stand in when that lookup can't be made.
-     */
-    const val KNOWN_ADD_HASH = "656c491c3f65d9d08d259be6632f4ef1931540ebcf766488ed17f63e1f8daf6b"
-    const val KNOWN_REMOVE_HASH = "1103bfd4b9d80275950bff95ef6d41a02cec3357e8f7ecd8974528043739677c"
+    /** The two mutations; their hashes come from [SpotifyQueryHashes]. */
+    const val ADD_OPERATION = SpotifyQueryHashes.ADD_TO_LIBRARY
+    const val REMOVE_OPERATION = SpotifyQueryHashes.REMOVE_FROM_LIBRARY
 
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
