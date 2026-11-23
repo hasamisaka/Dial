@@ -290,6 +290,19 @@ private const val PANEL_FADE_START = 0.45f
  */
 private const val SUBVIEW_INK_DIM = 0.30f
 
+/**
+ * How dark a full-screen Canvas runs under the lyrics and the queue, which
+ * it stays up behind: more than under the main player's controls, since a
+ * whole screen of lines is read over it.
+ */
+private const val CANVAS_PANEL_DIM = 0.60f
+
+/** How far out of focus that Canvas is put under those two screens. */
+private val CANVAS_PANEL_BLUR = 8.dp
+
+/** What the full player's own clip goes by among the frost sources. */
+private const val CANVAS_CLIP_HAZE_KEY = "player-canvas-clip"
+
 /** How long a Canvas can drop its picture before the player stops presenting it. */
 private const val CANVAS_DROP_GRACE_MS = 1_200L
 
@@ -351,6 +364,38 @@ private fun Modifier.trimBy(top: Dp, bottom: Dp, fraction: () -> Float): Modifie
     layout(placeable.width, (placeable.height - cutTop - cutBottom).coerceAtLeast(0)) {
         placeable.place(0, -cutTop)
     }
+}
+
+/**
+ * The blur a full-screen Canvas wears behind the lyrics and the queue: the
+ * player's own clip, sampled alone, put evenly out of focus. A composable of
+ * its own, to keep it out of the player's already very large body.
+ */
+@OptIn(ExperimentalHazeApi::class)
+@Composable
+private fun CanvasPanelBlur(
+    haze: HazeState,
+    shown: () -> Float,
+    modifier: Modifier = Modifier,
+) {
+    val reduceDynamicBlur by PlayerSettings.reduceDynamicBlur.collectAsStateWithLifecycle()
+    if (reduceDynamicBlur || !renderEffectBlurSupported) return
+    Box(
+        modifier
+            .graphicsLayer { alpha = shown() }
+            .optimizedHazeEffect(
+                state = haze,
+                style = HazeStyle(
+                    backgroundColor = Color.Transparent,
+                    tints = emptyList(),
+                    blurRadius = CANVAS_PANEL_BLUR,
+                    noiseFactor = 0f,
+                    fallbackTint = HazeTint(Color.Transparent),
+                ),
+            ) {
+                canDrawArea = { area -> area.key == CANVAS_CLIP_HAZE_KEY }
+            },
+    )
 }
 
 /**
@@ -2113,6 +2158,21 @@ fun NowPlayingScreen(
         }
     }
     val spotifyCanvasPresentation = spotifyCanvasFullscreen && canvasPresented
+    // A full-screen Canvas that is up stays up behind the lyrics and the
+    // queue: it plays on, dimmed and out of focus, in place of the blurred
+    // cover those screens otherwise stand on, and the header's thumbnail and
+    // credits fade in where they sit instead of the sleeve shrinking there
+    // out of a clip that never showed it. Asked of the clip rather than of
+    // [heroClip], which is the main player's layout and still goes at the
+    // collapse's half. Live: a song skipped to under a panel takes the cover's
+    // backdrop until its own clip is up, and hands over to it then.
+    val canvasUnderPanels = !landscapeLayout && heroMode && spotifyCanvasOnPhone && canvasPresented
+    val currentCanvasUnderPanels = rememberUpdatedState(canvasUnderPanels)
+    // Whether that Canvas is wearing the panels' dim and blur. From the tap
+    // on the way in; held to the collapse's half on the way out, where the
+    // main player's own dim and glass deck take it back.
+    val canvasPanelBackdrop = canvasUnderPanels &&
+        (((lyricsOpen || queueOpen) && collapseStarted) || collapsePastHalf)
     // The stretch between a full-screen clip's first frame and its layout
     // taking over: the sleeve, its blur and the backdrop are swept out on the
     // clip's diagonal (see [canvasSweepOut]) instead of each fading on its own.
@@ -2152,6 +2212,7 @@ fun NowPlayingScreen(
             else -> 0f
         },
         if (lyricsOpen || queueOpen) SUBVIEW_INK_DIM else 0f,
+        if (canvasPanelBackdrop) CANVAS_PANEL_DIM else 0f,
         if (landscapeBackdropClip != null) {
             landscapeCanvasDim(panelOpen = lyricsOpen || queueOpen)
         } else 0f,
@@ -2218,8 +2279,12 @@ fun NowPlayingScreen(
     // [heroClip], which has gone by the time it is still lingering: re-read
     // off that, its last few frames would resize the view and rebuild its
     // fade for a picture nobody can see.
+    //
+    // A full-screen Canvas is not let go of at all: it plays on behind the
+    // panels (see [canvasUnderPanels]), and one that was not up yet when its
+    // panel opened, or whose song was skipped to under it, loads there.
     val heroClipMounted = canvas?.takeIf {
-        heroMode && (!(lyricsOpen || queueOpen) || !collapseDone)
+        heroMode && (!(lyricsOpen || queueOpen) || !collapseDone || spotifyCanvasOnPhone)
     }
     // Worked out here as well as in the SideEffect below, for the one pass in
     // which the song has moved on but [outgoingClip] isn't set yet: decided only
@@ -3389,7 +3454,9 @@ fun NowPlayingScreen(
         val canvasCoversBackdrop by remember(canvasCover) {
             derivedStateOf { canvasCover.floatValue >= 0.999f }
         }
-        val backdropCovered = spotifyCanvasPresentation && canvasCoversBackdrop
+        // Under the lyrics and the queue as well, where it stays up.
+        val backdropCovered = (spotifyCanvasPresentation || currentCanvasUnderPanels.value) &&
+            canvasCoversBackdrop
         // Faded out under the clip on the same curve as the sleeve above it.
         val backdropClipAlpha: () -> Float = {
             if (spotifyCanvasFullscreen && !currentCanvasSweepPhase) {
@@ -3406,7 +3473,7 @@ fun NowPlayingScreen(
         val fullArtworkBackdropAlpha by animateFloatAsState(
             targetValue = if (
                 !legacyMeshBackdrop &&
-                (tabletArtworkBackdrop || lyricsOpen || queueOpen || !heroMode ||
+                (tabletArtworkBackdrop || ((lyricsOpen || queueOpen) && !backdropCovered) || !heroMode ||
                     (simpleBackdrop && !backdropCovered)) &&
                 (tabletArtworkBackdrop || fullArtworkBlurImage != null)
             ) 1f else 0f,
@@ -3483,8 +3550,14 @@ fun NowPlayingScreen(
                     // The panels asked first: a collapse a tap asked for is
                     // paused from the tap, and this screen doesn't then listen
                     // for the sleeve's first frame of movement as well.
-                    pausedForTransition = lyricsOpen || queueOpen || queueDragging ||
-                        collapseStarted || dockMoving,
+                    //
+                    // Not a Canvas that stays up behind the panels, which
+                    // plays on: nothing travels over it then. One still to
+                    // come up waits out the movement and loads at rest.
+                    pausedForTransition = dockMoving || (
+                        (lyricsOpen || queueOpen || queueDragging || collapseStarted) &&
+                            !(current && clipFullscreen && (currentCanvasUnderPanels.value || collapseDone))
+                        ),
                     leaving = outgoing,
                     // Spotify's 9:16 Canvas is the phone background, so it
                     // covers every edge. Other providers retain the contained
@@ -3507,9 +3580,21 @@ fun NowPlayingScreen(
                     // And with the rest of the player as it docks: a
                     // TextureView doesn't reliably take the fade from a
                     // Compose layer around it.
+                    //
+                    // Whole the entire way for a Canvas that stays up behind
+                    // the panels.
                     presentationAlpha = {
-                        if (next) 0f else (1f - 2f * p()).coerceIn(0f, 1f) * dockFade() *
-                            (if (outgoing) outgoingFade.value else incomingFade.value)
+                        if (next) {
+                            0f
+                        } else {
+                            val collapse = if (current && clipFullscreen && currentCanvasUnderPanels.value) {
+                                1f
+                            } else {
+                                (1f - 2f * p()).coerceIn(0f, 1f)
+                            }
+                            collapse * dockFade() *
+                                (if (outgoing) outgoingFade.value else incomingFade.value)
+                        }
                     },
                     onRenderedChanged = {
                         if (current) canvasRendered = it else preload?.rendered = it
@@ -3548,7 +3633,15 @@ fun NowPlayingScreen(
                             if (clipFullscreen || clipPortrait) Modifier.fillMaxSize()
                             else Modifier.fillMaxWidth().height(heroHeight),
                         )
-                        .then(if (next) Modifier else Modifier.hazeSource(playerHaze))
+                        .then(
+                            when {
+                                next -> Modifier
+                                // Named, for the blur that takes this clip
+                                // alone under the lyrics and the queue.
+                                current -> Modifier.hazeSource(playerHaze, key = CANVAS_CLIP_HAZE_KEY)
+                                else -> Modifier.hazeSource(playerHaze)
+                            },
+                        )
                         .then(
                             if (current) {
                                 Modifier.onGloballyPositioned {
@@ -3564,7 +3657,7 @@ fun NowPlayingScreen(
         // glass over the player (the ⋯ menu, the pills) sees the video as dim
         // as the screen shows it. Drawn after the source closed, they never
         // reached the glass: over a clip it went bright and almost clear.
-        if (heroMode && !spotifyCanvasPresentation && heroHeight > 0.dp) {
+        if (heroMode && !spotifyCanvasPresentation && !currentCanvasUnderPanels.value && heroHeight > 0.dp) {
             // The banner — still cover, square clip or portrait clip — is
             // blurred progressively from under the credits down, so the
             // controls sit on the cover's own colours dissolving rather
@@ -3695,6 +3788,26 @@ fun NowPlayingScreen(
             )
         }
 
+        // Behind the lyrics and the queue the Canvas plays on out of focus:
+        // one even blur over the whole of it, in place of the glass deck's,
+        // which leaves at the collapse's half. The clip alone is sampled; the
+        // sleeve is a frost source too, and the header's thumbnail came out
+        // with a blurred copy of itself around it. Without the blur (reduced,
+        // or before Android 12) the dim below carries it alone.
+        val canvasPanelBlur = animateFloatAsState(
+            targetValue = if (canvasPanelBackdrop) 1f else 0f,
+            animationSpec = tween(SPOTIFY_CANVAS_CONTROLS_ANIMATION_MS, easing = FastOutSlowInEasing),
+            label = "canvasPanelBlur",
+        )
+        val canvasPanelBlurShowing by remember { derivedStateOf { canvasPanelBlur.value > 0f } }
+        if (canvasPanelBackdrop || canvasPanelBlurShowing) {
+            CanvasPanelBlur(
+                haze = playerHaze,
+                shown = { canvasPanelBlur.value * dockFade() },
+                modifier = Modifier.matchParentSize(),
+            )
+        }
+
         // While the control deck is up, the whole Canvas sits under a flat 50%
         // dim so the buttons and text read against any clip. It fades out as
         // the deck collapses to the full-screen video, and back in with the
@@ -3704,6 +3817,8 @@ fun NowPlayingScreen(
         // beneath it never reached the glass and the deck stayed bright.
         val spotifyCanvasDim = animateFloatAsState(
             targetValue = when {
+                // Under the lyrics and the queue, where it stays up.
+                canvasPanelBackdrop -> CANVAS_PANEL_DIM
                 canvasChromeUp && spotifyCanvasControlsOpen -> 0.5f
                 canvasCompactMode -> 0.15f
                 else -> 0f
@@ -3713,7 +3828,7 @@ fun NowPlayingScreen(
             label = "spotifyCanvasDim",
         )
         val spotifyCanvasDimShowing by remember { derivedStateOf { spotifyCanvasDim.value > 0f } }
-        if (canvasChromeUp || spotifyCanvasDimShowing) {
+        if (canvasChromeUp || canvasPanelBackdrop || spotifyCanvasDimShowing) {
             Box(
                 Modifier.matchParentSize()
                     .then(sweepIn)
@@ -4217,13 +4332,35 @@ fun NowPlayingScreen(
                     .coerceAtLeast(0.dp) / 2
                 // Functions of the collapse, called at placement and measure
                 // — see [p]. Composition never reads them.
-                fun artSize(): Dp = lerp(fullArt, THUMB_SIZE, p())
-                fun artTop(): Dp = lerp(groupTop, 0.dp, p())
+                //
+                // Over a Canvas that stays up behind the panels (see
+                // [canvasUnderPanels]) nothing travels. The sleeve is not on
+                // screen there to shrink into the header, so the header's
+                // thumbnail and credits fade in where they sit: the credits
+                // go out where they stood over the collapse's first half, and
+                // the two come in at the header over its second. [headerP] is
+                // the collapse as that block's geometry takes it, one end or
+                // the other, and [headerFade] how much of it shows.
+                fun headerP(): Float = if (currentCanvasUnderPanels.value) {
+                    if (p() >= 0.5f) 1f else 0f
+                } else {
+                    p()
+                }
+                fun headerFade(): Float =
+                    if (currentCanvasUnderPanels.value) abs(2f * p() - 1f).coerceIn(0f, 1f) else 1f
+                // How much of the credits' main-player place is left.
+                fun mainShare(): Float = if (currentCanvasUnderPanels.value) {
+                    (1f - 2f * p()).coerceIn(0f, 1f)
+                } else {
+                    1f - p()
+                }
+                fun artSize(): Dp = lerp(fullArt, THUMB_SIZE, headerP())
+                fun artTop(): Dp = lerp(groupTop, 0.dp, headerP())
                 // Expanded and height-bound, the sleeve is narrower than the
                 // player and has to be centred in it; collapsed, it belongs
                 // hard against the left edge with the credits beside it.
-                fun artStart(): Dp = lerp((maxWidth - fullArt) / 2, 0.dp, p())
-                fun regularTitleTop(): Dp = lerp(groupTop + fullArt + ART_TITLE_GAP, 0.dp, p())
+                fun artStart(): Dp = lerp((maxWidth - fullArt) / 2, 0.dp, headerP())
+                fun regularTitleTop(): Dp = lerp(groupTop + fullArt + ART_TITLE_GAP, 0.dp, headerP())
                 // Once Spotify's control deck has left, keep the only remaining
                 // player chrome against the bottom edge instead of stranding it
                 // where the artwork's title normally sits near mid-screen.
@@ -4253,9 +4390,16 @@ fun NowPlayingScreen(
                     val compactTop = (
                         maxHeight - HEADER_HEIGHT + PANEL_DECK_GAP * lyricSlotFold.value
                         ).coerceAtLeast(0.dp)
-                    lerp(top, compactTop, canvasCompact.value)
+                    // Not once the credits have gone to the header over a
+                    // Canvas, which they do in one step: the compact controls
+                    // still easing away under them would slide them there.
+                    if (currentCanvasUnderPanels.value && p() >= 0.5f) {
+                        top
+                    } else {
+                        lerp(top, compactTop, canvasCompact.value)
+                    }
                 }
-                fun titleStart(): Dp = lerp(0.dp, THUMB_SIZE + 12.dp, p())
+                fun titleStart(): Dp = lerp(0.dp, THUMB_SIZE + 12.dp, headerP())
 
                 // How far down the *screen* the sleeve's bottom edge sits, which
                 // is where the full-bleed banner has to stop for the credits
@@ -4317,10 +4461,10 @@ fun NowPlayingScreen(
                 // How much of the banner is on screen: its share, given up as
                 // the sleeve collapses — the same movement as the collapse
                 // rather than a fade chained after it.
-                fun bannerShown(): Float = bannerShare() * (1f - p())
+                fun bannerShown(): Float = bannerShare() * (1f - headerP())
                 // The card's paused shrink, let go of as it collapses.
                 // None for a music video: a video doesn't breathe.
-                fun cardScale(): Float = if (videoMode) 1f else artScale + (1f - artScale) * p()
+                fun cardScale(): Float = if (videoMode) 1f else artScale + (1f - artScale) * headerP()
                 fun cardRect(): Rect = with(density) {
                     val side = artSize().roundToPx().toFloat()
                     val square = Rect(
@@ -4352,7 +4496,7 @@ fun NowPlayingScreen(
                     }
                     val thumbSide = with(density) { THUMB_SIZE.roundToPx().toFloat() }
                     val thumb = Rect(Offset.Zero, Size(thumbSide, thumbSide))
-                    return lerp(card, lerp(banner, thumb, p()), share)
+                    return lerp(card, lerp(banner, thumb, headerP()), share)
                 }
                 // The box's left edge in the player — the gutter, which the two
                 // widths give back between them.
@@ -4494,7 +4638,12 @@ fun NowPlayingScreen(
                             // let the dark backdrop show through mid-way, which
                             // read as a flicker between the art and the clip.
                             alpha = (
-                                if (handingOffClip != null) {
+                                if (currentCanvasUnderPanels.value && p() > 0f) {
+                                    // Behind the panels the clip stays up and
+                                    // the sleeve is the header's thumbnail
+                                    // alone, fading in there with the credits.
+                                    (2f * p() - 1f).coerceIn(0f, 1f)
+                                } else if (handingOffClip != null) {
                                     0f
                                 } else if (outgoingClip != null) {
                                     // Coming back in as the last track's clip
@@ -4980,7 +5129,7 @@ fun NowPlayingScreen(
                                 x = 0,
                                 y = (
                                     currentTitleTop() -
-                                        lerp(0.dp, (HEADER_HEIGHT - THUMB_SIZE) / 2, p())
+                                        lerp(0.dp, (HEADER_HEIGHT - THUMB_SIZE) / 2, headerP())
                                 ).roundToPx(),
                             )
                         }
@@ -4996,14 +5145,14 @@ fun NowPlayingScreen(
                         }
                         .height(HEADER_HEIGHT)
                         .drawControlsScrim(
-                            alpha = { controlsScrim * (1f - p()) },
+                            alpha = { controlsScrim * mainShare() },
                             rootOrigin = { titleRowOrigin },
                             rootSize = { titleRootSize },
                             dockFrame = dockFrame.takeIf { dock != null },
                             dockT = dockT,
                         )
                         .drawControlsScrim(
-                            alpha = { controlsVeil * (1f - p()) },
+                            alpha = { controlsVeil * mainShare() },
                             rootOrigin = { titleRowOrigin },
                             rootSize = { titleRootSize },
                             color = Color.White,
@@ -5019,7 +5168,11 @@ fun NowPlayingScreen(
                         // from the sleeve so the gap between the two is inside
                         // the band as well: it is a gap in one block, not a seam
                         // between two, and a finger should not be able to find it.
-                        .onGloballyPositioned { dismissBandBottom = it.boundsInRoot().bottom },
+                        .onGloballyPositioned { dismissBandBottom = it.boundsInRoot().bottom }
+                        // The credits and their buttons, out and back in
+                        // across a collapse over a Canvas — see [headerFade].
+                        // Inside the scrims above, which keep their own.
+                        .graphicsLayer { alpha = headerFade() },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column(
@@ -5029,7 +5182,7 @@ fun NowPlayingScreen(
                             // operation. Animating fontSize forced both marquee
                             // texts through shaping and measurement every frame.
                             .graphicsLayer {
-                                val scale = 1f - 0.2f * p()
+                                val scale = 1f - 0.2f * headerP()
                                 scaleX = scale
                                 scaleY = scale
                                 transformOrigin = TransformOrigin(0f, 0.5f)
