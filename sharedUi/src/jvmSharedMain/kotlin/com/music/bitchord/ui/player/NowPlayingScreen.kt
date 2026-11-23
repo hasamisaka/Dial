@@ -295,10 +295,10 @@ private const val SUBVIEW_INK_DIM = 0.30f
  * it stays up behind: more than under the main player's controls, since a
  * whole screen of lines is read over it.
  */
-private const val CANVAS_PANEL_DIM = 0.60f
+private const val CANVAS_PANEL_DIM = 0.75f
 
 /** How far out of focus that Canvas is put under those two screens. */
-private val CANVAS_PANEL_BLUR = 8.dp
+private val CANVAS_PANEL_BLUR = 11.dp
 
 /** What the full player's own clip goes by among the frost sources. */
 private const val CANVAS_CLIP_HAZE_KEY = "player-canvas-clip"
