@@ -86,14 +86,14 @@ jobs:
           chmod +x gradlew
           if [ -n "$DEBUG_KEYSTORE_BASE64" ]; then
             echo "$DEBUG_KEYSTORE_BASE64" | tr -d '\n\r ' | base64 -d > "$RUNNER_TEMP/key.keystore"
-            ./gradlew assembleDevBenchmark -x lintVitalDevBenchmark -PnoBenchmarkSuffix \
+            ./gradlew assembleDevBenchmark -x lintVitalDevBenchmark \
               -Pandroid.injected.signing.store.file="$RUNNER_TEMP/key.keystore" \
               -Pandroid.injected.signing.store.password=android \
               -Pandroid.injected.signing.key.alias=androiddebugkey \
               -Pandroid.injected.signing.key.password=android
           else
             echo "::warning::DEBUG_KEYSTORE_BASE64 が未設定。毎回別の鍵になるので、更新のたびにアンインストールが必要。"
-            ./gradlew assembleDevBenchmark -x lintVitalDevBenchmark -PnoBenchmarkSuffix
+            ./gradlew assembleDevBenchmark -x lintVitalDevBenchmark
           fi
 
       - name: Releases に公開
