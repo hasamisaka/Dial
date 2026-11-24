@@ -43,14 +43,14 @@ jobs:
 
       - name: パッチを取り出す
         if: steps.ver.outputs.skip != '1'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: fork
           sparse-checkout: custom
 
       - name: 元アプリのソースを取得
         if: steps.ver.outputs.skip != '1'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: steeben/Dial
           ref: ${{ steps.ver.outputs.tag }}
@@ -69,13 +69,13 @@ jobs:
 
       - name: JDK 17
         if: steps.ver.outputs.skip != '1'
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - if: steps.ver.outputs.skip != '1'
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: ビルド
         if: steps.ver.outputs.skip != '1'
