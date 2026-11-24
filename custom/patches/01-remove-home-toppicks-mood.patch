@@ -1,0 +1,26 @@
+diff --git a/app/src/main/java/com/music/bitchord/MainActivity.kt b/app/src/main/java/com/music/bitchord/MainActivity.kt
+index b2e2d87..24296ac 100644
+--- a/app/src/main/java/com/music/bitchord/MainActivity.kt
++++ b/app/src/main/java/com/music/bitchord/MainActivity.kt
+@@ -4190,16 +4190,12 @@ private fun BitChordApp(
+                             loadingMore = if (homeFeed.filtered) HomeCategory.loadingMore else homeLoadingMore,
+                             // The saved dial needs no placeholder while Recently played loads.
+                             recentlyPlayedLoading = homeRecentlyPlayedLoading && !holdSavedDial && !homeFeed.filtered,
+-                            topPicks = topPicks,
+-                            topPicksLoading = topPicksLoading,
++                            // Top Picks for You and Find Your Mood are removed from Home.
++                            topPicks = null,
++                            topPicksLoading = false,
+                             listenerName = account?.name,
+-                            // Top Picks and Find Your Mood are the whole of Home's, not a category's.
+-                            onTopPickClick = if (homeFeed.filtered) null else openTopPick,
+-                            onMoodClick = if (homeFeed.filtered) {
+-                                null
+-                            } else {
+-                                { mood, label -> openTopPick(TopPicks.moodStation(mood), label) }
+-                            },
++                            onTopPickClick = null,
++                            onMoodClick = null,
+                             // The category chips, beside the mark.
+                             logoRowContent = HomeCategoryRow,
+                             // ... and held under the top bar in the feed: the
